@@ -163,6 +163,9 @@ kann, kann man nicht fahren.
 | `tempo_voller_abstand` | `22.0` | ab hier gilt der volle Abstand |
 | `sichtfeld_still` / `sichtfeld_tempo` | `62` / `76` | kostet nichts, wirkt viel |
 | Federarm `transform` | Neigung 10° nach unten, 1,0 über dem Auto | Kamerahöhe — **tiefer als man denkt**. Bodennähe verkauft den Maßstab, Vogelperspektive zerstört ihn. |
+| `ruck_staerke` | `0.4` | Auslenkung des Stoßes beim Aufsammeln, in Einheiten. Die einzige Rückmeldung des Moments — Ton gibt es in diesem Slice nicht. |
+| `ruck_abklingen` | `7.0` | Wie schnell der Ruck ausklingt, in 1/s. Groß = kurz und trocken. |
+| `ruck_frequenz` | `6.0` | Schwingungen pro Sekunde. Zusammen mit den beiden Werten darüber sind das rund drei sichtbare Ausschläge — wenn das eher nach Wackeln als nach Schlag aussieht, `ruck_frequenz` hoch und `ruck_abklingen` hoch. |
 
 Der Pivot richtet sich nach der **Blickrichtung der Karosserie** aus, nicht nach
 der Fahrtrichtung. Deshalb schlägt die Kamera beim Rückwärtsfahren nicht um.

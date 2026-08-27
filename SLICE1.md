@@ -212,6 +212,32 @@ Entscheidung nach Block 2 zu treffen heißt, Block 2 zweimal zu bauen.
 
 ---
 
+### Eine Entscheidung, die im Plan nicht stand: Trümmer sind Schauspiel
+
+Ein gelöster Klotz ist 2,4 Einheiten hoch — **exakt so hoch wie die Wand**.
+Liegt er im Weg, ist er wieder ein Gate. Gemessen, vier Vollgas-Anläufe mit
+festen Trümmern:
+
+| Anfahrt | Ergebnis |
+|---|---|
+| Wandmitte | kam durch |
+| dicht an der West- bzw. Ostwand | **blieb stecken, zweimal von zwei** |
+
+Am Rand drückt der seitliche Schub die Klötze gegen die Seitenwand, von der sie
+in die eben gerissene Lücke zurückprallen. Mehr Höhe und mehr Schub machen das
+wahrscheinlicher richtig, aber nie sicher — und ein Gate, das in einem von vier
+Anläufen zumacht, ist schlimmer als eines, das immer hält.
+
+Deshalb wechseln gelöste Klötze auf Kollisionsebene 4: sie kollidieren weiter
+mit der Welt und untereinander, aber nicht mehr mit dem Auto. Sie fliegen und
+landen sichtbar wie zuvor, das Auto pflügt hindurch. Danach 4 von 4 Anläufen
+durch, alle bis ans andere Ende der Kiste.
+
+**Der Preis ist sichtbar:** die liegengebliebenen Trümmer sind dauerhaft
+durchfahrbar. Wer sie fest haben will, löscht den Ebenenwechsel in
+`auto/rammbock_wirkung.gd` — dann ist der Durchbruch wieder Glückssache. Das
+ist eine Gefühlsfrage und gehört Fabian, nicht dem Agenten.
+
 ## Was in Slice 1 weiterhin nicht passiert
 
 Aus der Liste in `CLAUDE.md` fallen genau **zwei** Punkte weg: *ein* Teil und
