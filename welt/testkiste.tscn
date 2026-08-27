@@ -1,0 +1,213 @@
+[gd_scene load_steps=17 format=3]
+
+; ---------------------------------------------------------------------------
+; TESTKISTE — Hauptszene. Das ist die Abnahmeszene für Slice 0.
+;
+; Abnahmekriterium (nur Fabian kann es feststellen):
+;   Zehn Minuten ziellos herumfahren, ohne einen Parameter anzufassen,
+;   macht Spaß. Zuckt die Hand zum Inspector statt zur Lenkung: nicht bestanden.
+;
+; Hier wird nichts gemessen. Gemessen wird in welt/testparcours.tscn.
+;
+; Tasten: W/S oder Hoch/Runter = Gas/Bremse, A/D oder Links/Rechts = Lenken,
+;         Leertaste = Handbremse, T = Getriebe auto/manuell, F/R = Gang,
+;         ~ = Debug-Overlay, < / > = Debug-Seite wechseln.
+; ---------------------------------------------------------------------------
+
+[ext_resource type="PackedScene" path="res://welt/kiste.tscn" id="1_kiste"]
+[ext_resource type="Script" path="res://addons/gevp/scripts/vehicle_controllergd.gd" id="2_steuerung"]
+[ext_resource type="PackedScene" path="res://auto/spielzeugauto.tscn" id="3_auto"]
+[ext_resource type="Script" path="res://addons/gevp/scripts/gui.gd" id="4_anzeige"]
+[ext_resource type="Script" path="res://addons/gevp/scripts/debug.gd" id="5_debug"]
+[ext_resource type="Script" path="res://addons/gevp/scripts/debug_ui.gd" id="6_debug_ui"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_holz"]
+albedo_color = Color(0.6, 0.42, 0.24, 1)
+roughness = 0.8
+
+[sub_resource type="StandardMaterial3D" id="Mat_kunststoff"]
+albedo_color = Color(0.22, 0.48, 0.55, 1)
+roughness = 0.5
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wuerfel"]
+size = Vector3(6, 6, 6)
+
+[sub_resource type="BoxMesh" id="Mesh_wuerfel"]
+material = SubResource("Mat_holz")
+size = Vector3(6, 6, 6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_flach"]
+size = Vector3(9, 5, 9)
+
+[sub_resource type="BoxMesh" id="Mesh_flach"]
+material = SubResource("Mat_kunststoff")
+size = Vector3(9, 5, 9)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_klein"]
+size = Vector3(4, 4, 4)
+
+[sub_resource type="BoxMesh" id="Mesh_klein"]
+material = SubResource("Mat_kunststoff")
+size = Vector3(4, 4, 4)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rampe"]
+size = Vector3(24, 2, 22)
+
+[sub_resource type="BoxMesh" id="Mesh_rampe"]
+material = SubResource("Mat_holz")
+size = Vector3(24, 2, 22)
+
+[node name="Testkiste" type="Node3D"]
+
+[node name="Kiste" parent="." instance=ExtResource("1_kiste")]
+
+; --- Hindernisse. Eine Handvoll, mehr nicht. -----------------------------
+[node name="Hindernisse" type="Node3D" parent="."]
+
+[node name="Wuerfel1" type="RigidBody3D" parent="Hindernisse" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 3.01, -18)
+collision_layer = 1
+collision_mask = 3
+mass = 120.0
+
+[node name="Kollision" type="CollisionShape3D" parent="Hindernisse/Wuerfel1"]
+shape = SubResource("BoxShape3D_wuerfel")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Hindernisse/Wuerfel1"]
+mesh = SubResource("Mesh_wuerfel")
+
+[node name="Wuerfel2" type="RigidBody3D" parent="Hindernisse" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 3.01, -46)
+collision_layer = 1
+collision_mask = 3
+mass = 120.0
+
+[node name="Kollision" type="CollisionShape3D" parent="Hindernisse/Wuerfel2"]
+shape = SubResource("BoxShape3D_wuerfel")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Hindernisse/Wuerfel2"]
+mesh = SubResource("Mesh_wuerfel")
+
+[node name="Wuerfel3" type="RigidBody3D" parent="Hindernisse" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -34, 9.05, -46)
+collision_layer = 1
+collision_mask = 3
+mass = 120.0
+
+[node name="Kollision" type="CollisionShape3D" parent="Hindernisse/Wuerfel3"]
+shape = SubResource("BoxShape3D_wuerfel")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Hindernisse/Wuerfel3"]
+mesh = SubResource("Mesh_wuerfel")
+
+[node name="Quader1" type="RigidBody3D" parent="Hindernisse" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 58, 2.51, -70)
+collision_layer = 1
+collision_mask = 3
+mass = 200.0
+
+[node name="Kollision" type="CollisionShape3D" parent="Hindernisse/Quader1"]
+shape = SubResource("BoxShape3D_flach")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Hindernisse/Quader1"]
+mesh = SubResource("Mesh_flach")
+
+[node name="Quader2" type="RigidBody3D" parent="Hindernisse" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -66, 2.51, 24)
+collision_layer = 1
+collision_mask = 3
+mass = 200.0
+
+[node name="Kollision" type="CollisionShape3D" parent="Hindernisse/Quader2"]
+shape = SubResource("BoxShape3D_flach")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Hindernisse/Quader2"]
+mesh = SubResource("Mesh_flach")
+
+[node name="Klotz1" type="RigidBody3D" parent="Hindernisse" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 2.01, 30)
+collision_layer = 1
+collision_mask = 3
+mass = 45.0
+
+[node name="Kollision" type="CollisionShape3D" parent="Hindernisse/Klotz1"]
+shape = SubResource("BoxShape3D_klein")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Hindernisse/Klotz1"]
+mesh = SubResource("Mesh_klein")
+
+[node name="Klotz2" type="RigidBody3D" parent="Hindernisse" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -18, 2.01, -8)
+collision_layer = 1
+collision_mask = 3
+mass = 45.0
+
+[node name="Kollision" type="CollisionShape3D" parent="Hindernisse/Klotz2"]
+shape = SubResource("BoxShape3D_klein")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Hindernisse/Klotz2"]
+mesh = SubResource("Mesh_klein")
+
+; Flache Rampe, 8 Grad — fuer den Sprungtest aus Woche 3. Anfahrt in -Z.
+[node name="Rampe" type="StaticBody3D" parent="Hindernisse" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 0.990268, -0.139173, 0, 0.139173, 0.990268, 0, 0.55, -95)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Hindernisse/Rampe"]
+shape = SubResource("BoxShape3D_rampe")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Hindernisse/Rampe"]
+mesh = SubResource("Mesh_rampe")
+
+; --- Fahrzeug ------------------------------------------------------------
+[node name="Fahrzeug" type="Node3D" parent="." node_paths=PackedStringArray("vehicle_node")]
+script = ExtResource("2_steuerung")
+vehicle_node = NodePath("Spielzeugauto")
+
+[node name="Spielzeugauto" parent="Fahrzeug" instance=ExtResource("3_auto")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 60)
+
+; --- Instrumente fürs Tunen ----------------------------------------------
+[node name="Anzeige" type="Control" parent="." node_paths=PackedStringArray("vehicle")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_anzeige")
+vehicle = NodePath("../Fahrzeug/Spielzeugauto")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Anzeige"]
+layout_mode = 1
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 240.0
+offset_bottom = 80.0
+mouse_filter = 2
+
+[node name="Speed" type="Label" parent="Anzeige/VBoxContainer"]
+layout_mode = 2
+
+[node name="RPM" type="Label" parent="Anzeige/VBoxContainer"]
+layout_mode = 2
+
+[node name="Gear" type="Label" parent="Anzeige/VBoxContainer"]
+layout_mode = 2
+
+[node name="Debug" type="Node" parent="." node_paths=PackedStringArray("vehicle")]
+script = ExtResource("5_debug")
+vehicle = NodePath("../Fahrzeug/Spielzeugauto")
+show_debug = false
+
+[node name="DebugUI" type="Control" parent="Debug"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_debug_ui")

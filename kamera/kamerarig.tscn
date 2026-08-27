@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://kamera/kamera_rig.gd" id="1_rig"]
+[ext_resource type="CameraAttributesPractical" path="res://optik/miniatur_kamera.tres" id="2_optik"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_federarm"]
+radius = 0.4
+
+[node name="Kamerarig" type="Node3D"]
+top_level = true
+script = ExtResource("1_rig")
+
+[node name="Federarm" type="SpringArm3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.984808, 0.173648, 0, -0.173648, 0.984808, 0, 1, 0)
+collision_mask = 1
+shape = SubResource("SphereShape3D_federarm")
+spring_length = 7.5
+margin = 0.2
+
+[node name="Kamera" type="Camera3D" parent="Federarm"]
+attributes = ExtResource("2_optik")
+current = true
+fov = 62.0
+near = 0.05
+far = 900.0
