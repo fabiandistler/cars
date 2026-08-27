@@ -158,7 +158,7 @@ Bei 5 h/Woche, netto vier:
 | 2 | Rammbock am Auto: Mesh, Kollisionsform, Position | 3 | sichtbar montiert | offen |
 | 3 | Fundstück + Aufnahme (Area3D, Sichtbarkeit umschalten) | 2 | Schleife geschlossen | offen |
 | 4 | Zerfall der Barriere beim Treffer | 2 | Durchbruch sieht gut aus | offen |
-| 5 | Lesbarkeit: Platzierung, Licht, was hinter der Barriere lockt | 3 | ohne Erklärung verständlich | offen |
+| 5 | Lesbarkeit: Platzierung, Licht, was hinter der Barriere lockt. **Zwei Auflagen aus Block 0/1:** der Köder muss über `y = 2,4` hinausragen, sonst ist er aus der Anfahrt unsichtbar; und die Wand liegt 0,035 unter der Dachkante des Trucks — hier entscheidet sich, ob sie so lesbar ist oder 0,3–0,5 höher gehört | 3 | ohne Erklärung verständlich | offen |
 | 6 | Zehn Minuten fahren, entscheiden | 1 | bestanden / nicht bestanden | offen |
 | | **Summe** | **17** | **≈ 4–5 Wochen** | |
 

@@ -23,6 +23,13 @@
 ; an den Naben hängen, weil wheel.gd dort Federung und Lenkeinschlag anzeigt.
 ; Dafür ist der Knoten als "editable" markiert.
 ;
+;   Diese Überschreibungen hängen an "index=" und damit an der Reihenfolge, in
+;   der der Importer die Kinder anlegt. Gegen einen Kaltimport geprüft (.godot/
+;   gelöscht, neu importiert): Reihenfolge und alle vier visible = false halten.
+;   Falls nach einem Godot-Update doch ein starres Rad auftaucht, ist das die
+;   Stelle — dann statt der Szenen-Überschreibung den Knoten schon beim Import
+;   überspringen (vehicle-truck.glb.import, _subresources/nodes).
+;
 ; RÄDER: "wheel-small" aus demselben Kit — das Modell, das der Truck selbst
 ; benutzt. Rohradius 0,125, skaliert mit 3,6 auf Radius 0,45.
 ;
