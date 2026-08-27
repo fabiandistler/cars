@@ -1,0 +1,132 @@
+[gd_scene load_steps=13 format=3]
+
+; ---------------------------------------------------------------------------
+; Die leere Kiste — Boden, vier Wände, Sonne, Umgebung. Sonst nichts.
+;
+; Boden 400 x 400 Einheiten. Bei 4 Einheiten Autolänge sind das 100 Autolängen,
+; entspricht ~7 m Realmaß im Spielzeugmaßstab (1 Realzentimeter ~ 0,57 Einheiten).
+;
+; GRUPPE "Road": wheel.gd liest die ERSTE Gruppe des getroffenen Colliders und
+; schlägt damit Reifensteifigkeit, Reibbeiwert und Rollwiderstand nach. Jeder
+; StaticBody3D und RigidBody3D, den ein Rad berühren kann, muss entweder ohne
+; Gruppe sein oder als erste Gruppe "Road", "Dirt" oder "Grass" tragen — sonst
+; läuft der Controller in einen Dictionary-Fehler.
+; ---------------------------------------------------------------------------
+
+[ext_resource type="Environment" path="res://optik/miniatur_umgebung.tres" id="1_umgebung"]
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_beton"]
+noise_type = 2
+frequency = 0.012
+fractal_type = 0
+cellular_jitter = 0.9
+
+[sub_resource type="Gradient" id="Gradient_beton"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(0.26, 0.25, 0.24, 1, 0.5, 0.49, 0.46, 1)
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_beton"]
+width = 256
+height = 256
+seamless = true
+color_ramp = SubResource("Gradient_beton")
+noise = SubResource("FastNoiseLite_beton")
+
+[sub_resource type="StandardMaterial3D" id="Mat_boden"]
+albedo_texture = SubResource("NoiseTexture2D_beton")
+roughness = 0.92
+uv1_scale = Vector3(0.08, 0.08, 0.08)
+uv1_triplanar = true
+
+[sub_resource type="StandardMaterial3D" id="Mat_wand"]
+albedo_color = Color(0.3, 0.32, 0.35, 1)
+roughness = 0.85
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_boden"]
+size = Vector3(400, 4, 400)
+
+[sub_resource type="BoxMesh" id="Mesh_boden"]
+material = SubResource("Mat_boden")
+size = Vector3(400, 4, 400)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wand_x"]
+size = Vector3(4, 16, 408)
+
+[sub_resource type="BoxMesh" id="Mesh_wand_x"]
+material = SubResource("Mat_wand")
+size = Vector3(4, 16, 408)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wand_z"]
+size = Vector3(408, 16, 4)
+
+[sub_resource type="BoxMesh" id="Mesh_wand_z"]
+material = SubResource("Mat_wand")
+size = Vector3(408, 16, 4)
+
+[node name="Kiste" type="Node3D"]
+
+[node name="Umgebung" type="WorldEnvironment" parent="."]
+environment = ExtResource("1_umgebung")
+
+[node name="Sonne" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.788011, 0.485148, -0.379039, 0, 0.615661, 0.788011, 0.615661, -0.620961, 0.485148, 0, 40, 0)
+light_color = Color(1, 0.96, 0.89, 1)
+light_energy = 1.15
+shadow_enabled = true
+shadow_blur = 0.5
+directional_shadow_max_distance = 160.0
+
+[node name="Boden" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2, 0)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Boden"]
+shape = SubResource("BoxShape3D_boden")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Boden"]
+mesh = SubResource("Mesh_boden")
+
+[node name="WandNord" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, -202)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="WandNord"]
+shape = SubResource("BoxShape3D_wand_z")
+
+[node name="Flaeche" type="MeshInstance3D" parent="WandNord"]
+mesh = SubResource("Mesh_wand_z")
+
+[node name="WandSued" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 8, 202)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="WandSued"]
+shape = SubResource("BoxShape3D_wand_z")
+
+[node name="Flaeche" type="MeshInstance3D" parent="WandSued"]
+mesh = SubResource("Mesh_wand_z")
+
+[node name="WandWest" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -202, 8, 0)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="WandWest"]
+shape = SubResource("BoxShape3D_wand_x")
+
+[node name="Flaeche" type="MeshInstance3D" parent="WandWest"]
+mesh = SubResource("Mesh_wand_x")
+
+[node name="WandOst" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 202, 8, 0)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="WandOst"]
+shape = SubResource("BoxShape3D_wand_x")
+
+[node name="Flaeche" type="MeshInstance3D" parent="WandOst"]
+mesh = SubResource("Mesh_wand_x")

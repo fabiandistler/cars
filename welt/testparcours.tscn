@@ -1,0 +1,314 @@
+[gd_scene load_steps=27 format=3]
+
+; ---------------------------------------------------------------------------
+; TESTPARCOURS — die Messstrecke.
+;
+; AB JETZT EINGEFROREN. Das ist kein Level-Design und keine Spielwelt, sondern
+; das Messinstrument: Slalom, 90-Grad-Ecke, Sprungrampe, Vollbremszone.
+; Wer die Strecke ändert, macht alle bisherigen Zeilen in TUNING.csv wertlos,
+; weil sie dann nicht mehr vergleichbar sind.
+;
+; Ablauf einer Runde (Start bei z = +125, Blickrichtung -Z):
+;   1. Slalom      6 Pylonen, Abstand 16, Versatz +/-6          -> Reaktion
+;   2. 90-Grad-Ecke  Korridor 26 breit, biegt nach +X ab       -> Kontrolle
+;   3. Sprungrampe   10 Grad, ~4 Einheiten Hoehe               -> Gewicht
+;   4. Vollbremszone bei Linie 1 (x=115) bremsen,
+;                    vor Linie 2 (x=158) stehen                -> Kontrolle
+;
+; Ein Parameter pro Durchgang. Immer diese Strecke. Alles in TUNING.csv.
+; ---------------------------------------------------------------------------
+
+[ext_resource type="PackedScene" path="res://welt/kiste.tscn" id="1_kiste"]
+[ext_resource type="Script" path="res://addons/gevp/scripts/vehicle_controllergd.gd" id="2_steuerung"]
+[ext_resource type="PackedScene" path="res://auto/spielzeugauto.tscn" id="3_auto"]
+[ext_resource type="Script" path="res://addons/gevp/scripts/gui.gd" id="4_anzeige"]
+[ext_resource type="Script" path="res://addons/gevp/scripts/debug.gd" id="5_debug"]
+[ext_resource type="Script" path="res://addons/gevp/scripts/debug_ui.gd" id="6_debug_ui"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_pylone"]
+albedo_color = Color(0.93, 0.36, 0.09, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_mauer"]
+albedo_color = Color(0.5, 0.52, 0.55, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Mat_rampe"]
+albedo_color = Color(0.85, 0.7, 0.16, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_linie"]
+albedo_color = Color(0.95, 0.95, 0.95, 1)
+roughness = 0.5
+
+[sub_resource type="CylinderShape3D" id="Shape_pylone"]
+height = 5.0
+radius = 1.2
+
+[sub_resource type="CylinderMesh" id="Mesh_pylone"]
+material = SubResource("Mat_pylone")
+top_radius = 0.5
+bottom_radius = 1.2
+height = 5.0
+radial_segments = 16
+rings = 1
+
+[sub_resource type="BoxShape3D" id="Shape_rampe"]
+size = Vector3(24, 2, 22)
+
+[sub_resource type="BoxMesh" id="Mesh_rampe"]
+material = SubResource("Mat_rampe")
+size = Vector3(24, 2, 22)
+
+[sub_resource type="BoxMesh" id="Mesh_linie_quer"]
+material = SubResource("Mat_linie")
+size = Vector3(1.5, 0.06, 24)
+
+[sub_resource type="BoxMesh" id="Mesh_linie_start"]
+material = SubResource("Mat_linie")
+size = Vector3(26, 0.06, 1.5)
+
+[sub_resource type="BoxShape3D" id="Shape_MauerAussenZ"]
+size = Vector3(2, 5, 44)
+
+[sub_resource type="BoxMesh" id="Mesh_MauerAussenZ"]
+material = SubResource("Mat_mauer")
+size = Vector3(2, 5, 44)
+
+[sub_resource type="BoxShape3D" id="Shape_MauerAussenX"]
+size = Vector3(185, 5, 2)
+
+[sub_resource type="BoxMesh" id="Mesh_MauerAussenX"]
+material = SubResource("Mat_mauer")
+size = Vector3(185, 5, 2)
+
+[sub_resource type="BoxShape3D" id="Shape_MauerInnenZ"]
+size = Vector3(2, 5, 20)
+
+[sub_resource type="BoxMesh" id="Mesh_MauerInnenZ"]
+material = SubResource("Mat_mauer")
+size = Vector3(2, 5, 20)
+
+[sub_resource type="BoxShape3D" id="Shape_MauerInnenX"]
+size = Vector3(159, 5, 2)
+
+[sub_resource type="BoxMesh" id="Mesh_MauerInnenX"]
+material = SubResource("Mat_mauer")
+size = Vector3(159, 5, 2)
+
+[sub_resource type="BoxShape3D" id="Shape_MauerEnde"]
+size = Vector3(2, 5, 26)
+
+[sub_resource type="BoxMesh" id="Mesh_MauerEnde"]
+material = SubResource("Mat_mauer")
+size = Vector3(2, 5, 26)
+
+[node name="Testparcours" type="Node3D"]
+
+[node name="Kiste" parent="." instance=ExtResource("1_kiste")]
+
+; --- 1. Slalom ---------------------------------------------------------
+[node name="Slalom" type="Node3D" parent="."]
+
+[node name="Pylone1" type="StaticBody3D" parent="Slalom" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2.5, 100)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Slalom/Pylone1"]
+shape = SubResource("Shape_pylone")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Slalom/Pylone1"]
+mesh = SubResource("Mesh_pylone")
+
+[node name="Pylone2" type="StaticBody3D" parent="Slalom" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.5, 84)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Slalom/Pylone2"]
+shape = SubResource("Shape_pylone")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Slalom/Pylone2"]
+mesh = SubResource("Mesh_pylone")
+
+[node name="Pylone3" type="StaticBody3D" parent="Slalom" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2.5, 68)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Slalom/Pylone3"]
+shape = SubResource("Shape_pylone")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Slalom/Pylone3"]
+mesh = SubResource("Mesh_pylone")
+
+[node name="Pylone4" type="StaticBody3D" parent="Slalom" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.5, 52)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Slalom/Pylone4"]
+shape = SubResource("Shape_pylone")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Slalom/Pylone4"]
+mesh = SubResource("Mesh_pylone")
+
+[node name="Pylone5" type="StaticBody3D" parent="Slalom" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 2.5, 36)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Slalom/Pylone5"]
+shape = SubResource("Shape_pylone")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Slalom/Pylone5"]
+mesh = SubResource("Mesh_pylone")
+
+[node name="Pylone6" type="StaticBody3D" parent="Slalom" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2.5, 20)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Slalom/Pylone6"]
+shape = SubResource("Shape_pylone")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Slalom/Pylone6"]
+mesh = SubResource("Mesh_pylone")
+
+; --- 2. 90-Grad-Ecke: Korridor, biegt nach +X ab ------------------------
+[node name="Ecke" type="Node3D" parent="."]
+
+[node name="MauerAussenZ" type="StaticBody3D" parent="Ecke" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 2.5, -10)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Ecke/MauerAussenZ"]
+shape = SubResource("Shape_MauerAussenZ")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Ecke/MauerAussenZ"]
+mesh = SubResource("Mesh_MauerAussenZ")
+
+[node name="MauerAussenX" type="StaticBody3D" parent="Ecke" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 79.5, 2.5, -32)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Ecke/MauerAussenX"]
+shape = SubResource("Shape_MauerAussenX")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Ecke/MauerAussenX"]
+mesh = SubResource("Mesh_MauerAussenX")
+
+[node name="MauerInnenZ" type="StaticBody3D" parent="Ecke" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13, 2.5, 2)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Ecke/MauerInnenZ"]
+shape = SubResource("Shape_MauerInnenZ")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Ecke/MauerInnenZ"]
+mesh = SubResource("Mesh_MauerInnenZ")
+
+[node name="MauerInnenX" type="StaticBody3D" parent="Ecke" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 92.5, 2.5, -8)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Ecke/MauerInnenX"]
+shape = SubResource("Shape_MauerInnenX")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Ecke/MauerInnenX"]
+mesh = SubResource("Mesh_MauerInnenX")
+
+[node name="MauerEnde" type="StaticBody3D" parent="Ecke" groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 172, 2.5, -20)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Ecke/MauerEnde"]
+shape = SubResource("Shape_MauerEnde")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Ecke/MauerEnde"]
+mesh = SubResource("Mesh_MauerEnde")
+
+; --- 3. Sprungrampe, 10 Grad -------------------------------------------
+[node name="Sprungrampe" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(0.984808, -0.173648, 0, 0.173648, 0.984808, 0, 0, 0, 1, 55, 1, -20)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Kollision" type="CollisionShape3D" parent="Sprungrampe"]
+shape = SubResource("Shape_rampe")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Sprungrampe"]
+mesh = SubResource("Mesh_rampe")
+
+; --- Markierungen: nur Optik, keine Kollision --------------------------
+[node name="Markierungen" type="Node3D" parent="."]
+
+[node name="Startlinie" type="MeshInstance3D" parent="Markierungen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.03, 125)
+mesh = SubResource("Mesh_linie_start")
+
+[node name="Bremspunkt" type="MeshInstance3D" parent="Markierungen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 115, 0.03, -20)
+mesh = SubResource("Mesh_linie_quer")
+
+[node name="Haltelinie" type="MeshInstance3D" parent="Markierungen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 158, 0.03, -20)
+mesh = SubResource("Mesh_linie_quer")
+
+; --- Fahrzeug ----------------------------------------------------------
+[node name="Fahrzeug" type="Node3D" parent="." node_paths=PackedStringArray("vehicle_node")]
+script = ExtResource("2_steuerung")
+vehicle_node = NodePath("Spielzeugauto")
+
+[node name="Spielzeugauto" parent="Fahrzeug" instance=ExtResource("3_auto")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 125)
+
+; --- Instrumente -------------------------------------------------------
+[node name="Anzeige" type="Control" parent="." node_paths=PackedStringArray("vehicle")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_anzeige")
+vehicle = NodePath("../Fahrzeug/Spielzeugauto")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Anzeige"]
+layout_mode = 1
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 240.0
+offset_bottom = 80.0
+mouse_filter = 2
+
+[node name="Speed" type="Label" parent="Anzeige/VBoxContainer"]
+layout_mode = 2
+
+[node name="RPM" type="Label" parent="Anzeige/VBoxContainer"]
+layout_mode = 2
+
+[node name="Gear" type="Label" parent="Anzeige/VBoxContainer"]
+layout_mode = 2
+
+[node name="Debug" type="Node" parent="." node_paths=PackedStringArray("vehicle")]
+script = ExtResource("5_debug")
+vehicle = NodePath("../Fahrzeug/Spielzeugauto")
+show_debug = false
+
+[node name="DebugUI" type="Control" parent="Debug"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("6_debug_ui")

@@ -1,0 +1,236 @@
+[gd_scene load_steps=17 format=3]
+
+; ---------------------------------------------------------------------------
+; Spielzeugauto — Slice 0
+;
+; MASSSTAB: Das Auto ist 4 Godot-Einheiten lang. Die Welt wird mit Faktor ~57
+; gegenüber der Realität gebaut (1 Realzentimeter ~ 0,57 Einheiten). Nicht das
+; Auto verkleinern — Kollisionstoleranz, Federweg und Solver-Schritt sind bei
+; sehr kleinen Körpern größer als das Fahrzeug. Siehe CONTEXT.md.
+;
+; KAROSSERIE: Platzhalter aus Godot-Primitiven. Das Kenney Toy Car Kit ist noch
+; nicht ausgewählt (welches Auto = offene Frage). Zum Tauschen nur die drei
+; MeshInstance3D unter "Karosserie" durch das importierte Modell ersetzen und
+; die Skalierung so wählen, dass es 4 Einheiten lang bleibt. Kollisionskörper,
+; Radpositionen und Reifenradius bleiben davon unberührt.
+;
+; FAHRHILFEN: alle aus. Siehe TUNING.md.
+; ---------------------------------------------------------------------------
+
+[ext_resource type="Script" path="res://addons/gevp/scripts/vehicle.gd" id="1_fahrzeug"]
+[ext_resource type="Script" path="res://addons/gevp/scripts/wheel.gd" id="2_rad"]
+[ext_resource type="PackedScene" path="res://kamera/kamerarig.tscn" id="3_kamera"]
+[ext_resource type="PackedScene" path="res://addons/gevp/scenes/engine_sound.tscn" id="4_motorton"]
+
+; Drehmomentkurve des Arcade-Presets, unverändert übernommen.
+[sub_resource type="Curve" id="Curve_drehmoment"]
+_data = [Vector2(0, 0.494505), 0.0, 2.04495, 0, 0, Vector2(0.617978, 1), 0.0, 0.0, 0, 0, Vector2(1, 0.692308), -1.4839, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_karosserie"]
+size = Vector3(1.9, 1.35, 3.9)
+
+[sub_resource type="StandardMaterial3D" id="Mat_lack"]
+albedo_color = Color(0.84, 0.18, 0.21, 1)
+metallic_specular = 0.6
+roughness = 0.35
+
+[sub_resource type="StandardMaterial3D" id="Mat_dach"]
+albedo_color = Color(0.93, 0.91, 0.86, 1)
+roughness = 0.45
+
+[sub_resource type="StandardMaterial3D" id="Mat_licht"]
+albedo_color = Color(0.98, 0.86, 0.42, 1)
+roughness = 0.2
+
+[sub_resource type="StandardMaterial3D" id="Mat_reifen"]
+albedo_color = Color(0.1, 0.1, 0.11, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_felge"]
+albedo_color = Color(0.78, 0.79, 0.82, 1)
+metallic = 0.6
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="Mesh_karosserie"]
+material = SubResource("Mat_lack")
+size = Vector3(2, 0.65, 4)
+
+[sub_resource type="BoxMesh" id="Mesh_dach"]
+material = SubResource("Mat_dach")
+size = Vector3(1.7, 0.55, 2)
+
+[sub_resource type="BoxMesh" id="Mesh_scheinwerfer"]
+material = SubResource("Mat_licht")
+size = Vector3(0.36, 0.22, 0.12)
+
+[sub_resource type="CylinderMesh" id="Mesh_reifen"]
+material = SubResource("Mat_reifen")
+top_radius = 0.45
+bottom_radius = 0.45
+height = 0.32
+radial_segments = 24
+rings = 1
+
+; Sichtbare Speiche — ohne sie sieht man dem schwarzen Reifen die Drehung nicht an.
+[sub_resource type="BoxMesh" id="Mesh_speiche"]
+material = SubResource("Mat_felge")
+size = Vector3(0.34, 0.76, 0.14)
+
+[node name="Spielzeugauto" type="RigidBody3D" node_paths=PackedStringArray("front_left_wheel", "front_right_wheel", "rear_left_wheel", "rear_right_wheel")]
+collision_layer = 2
+collision_mask = 1
+center_of_mass_mode = 1
+linear_damp_mode = 1
+angular_damp_mode = 1
+script = ExtResource("1_fahrzeug")
+
+; --- Räder --------------------------------------------------------------
+front_left_wheel = NodePath("RadVorneLinks")
+front_right_wheel = NodePath("RadVorneRechts")
+rear_left_wheel = NodePath("RadHintenLinks")
+rear_right_wheel = NodePath("RadHintenRechts")
+
+; --- Fahrhilfen: alle aus (Slice 0, Woche 6-8) ---------------------------
+; Sonst tunt man gegen versteckte Korrekturen. Einzeln zuschalten kommt NACH
+; dem Grundtuning. Wie man sie wieder anschaltet, steht in TUNING.md.
+steering_slip_assist = 100000.0
+countersteer_assist = 0.0
+traction_control_max_slip = -1.0
+front_abs_spin_difference_threshold = 100000.0
+rear_abs_spin_difference_threshold = 100000.0
+enable_stability = false
+
+; --- Motor / Antrieb (Arcade-Preset) -------------------------------------
+; max_torque gegenüber dem Arcade-Preset (300) hochgezogen, weil der größere
+; Reifenradius (0,45 statt 0,3) dasselbe Drehmoment in weniger Vortrieb umsetzt.
+max_torque = 450.0
+torque_curve = SubResource("Curve_drehmoment")
+variable_torque_split = true
+front_variable_split = 0.5
+
+; --- Bremsen -------------------------------------------------------------
+; Der Controller rechnet die Bremskraft intern mit fest verdrahteten 9,8 m/s².
+; Bei Schwerkraft x2 haben die Reifen doppelte Radlast, die Bremse aber nicht
+; mehr Kraft. Deshalb hier x2. Ändert sich die Schwerkraft, ändert sich das mit.
+brake_force_multiplier = 2.0
+braking_grip_multiplier = 2.0
+
+; --- Masse und Federung --------------------------------------------------
+; ACHTUNG Kopplung: die Federrate wird aus Masse, Federweg und Ruhelage
+; berechnet — ebenfalls mit fest verdrahteten 9,8 m/s². Faustregel:
+;   resting_ratio = 0,5 / Schwerkraftfaktor
+; Bei Faktor 2 also 0,25. Wer die Schwerkraft ändert und das hier vergisst,
+; setzt das Auto auf die Anschläge und tunt danach Unsinn. Siehe TUNING.md.
+vehicle_mass = 1500.0
+center_of_gravity_height_offset = -0.35
+front_spring_length = 0.25
+front_resting_ratio = 0.25
+front_damping_ratio = 0.6
+rear_spring_length = 0.3
+rear_resting_ratio = 0.25
+rear_damping_ratio = 0.6
+
+; --- Reifen --------------------------------------------------------------
+contact_patch = 0.3
+lateral_grip_assist = {
+"Dirt": 0.0,
+"Grass": 0.0,
+"Road": 0.0
+}
+front_tire_radius = 0.45
+front_tire_width = 320.0
+front_wheel_mass = 25.0
+rear_tire_radius = 0.45
+rear_tire_width = 320.0
+rear_wheel_mass = 25.0
+
+[node name="Kollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
+shape = SubResource("BoxShape3D_karosserie")
+
+[node name="Karosserie" type="Node3D" parent="."]
+
+[node name="Rumpf" type="MeshInstance3D" parent="Karosserie"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("Mesh_karosserie")
+
+[node name="Dach" type="MeshInstance3D" parent="Karosserie"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.25)
+mesh = SubResource("Mesh_dach")
+
+[node name="ScheinwerferLinks" type="MeshInstance3D" parent="Karosserie"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0.95, -2)
+mesh = SubResource("Mesh_scheinwerfer")
+
+[node name="ScheinwerferRechts" type="MeshInstance3D" parent="Karosserie"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0.95, -2)
+mesh = SubResource("Mesh_scheinwerfer")
+
+; --- Räder: RayCast3D am oberen Federende, -Z ist vorne -------------------
+; Die Reichweite des Raycasts setzt wheel.gd selbst auf Federweg + Reifenradius.
+
+[node name="RadVorneLinks" type="RayCast3D" parent="." node_paths=PackedStringArray("wheel_node")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.52, -1.1)
+script = ExtResource("2_rad")
+wheel_node = NodePath("Nabe")
+
+[node name="Nabe" type="Node3D" parent="RadVorneLinks"]
+
+[node name="Reifen" type="MeshInstance3D" parent="RadVorneLinks/Nabe"]
+transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("Mesh_reifen")
+
+[node name="Speiche" type="MeshInstance3D" parent="RadVorneLinks/Nabe"]
+mesh = SubResource("Mesh_speiche")
+
+[node name="RadVorneRechts" type="RayCast3D" parent="." node_paths=PackedStringArray("wheel_node")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.52, -1.1)
+script = ExtResource("2_rad")
+wheel_node = NodePath("Nabe")
+
+[node name="Nabe" type="Node3D" parent="RadVorneRechts"]
+
+[node name="Reifen" type="MeshInstance3D" parent="RadVorneRechts/Nabe"]
+transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("Mesh_reifen")
+
+[node name="Speiche" type="MeshInstance3D" parent="RadVorneRechts/Nabe"]
+mesh = SubResource("Mesh_speiche")
+
+[node name="RadHintenLinks" type="RayCast3D" parent="." node_paths=PackedStringArray("wheel_node")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.52, 1.1)
+script = ExtResource("2_rad")
+wheel_node = NodePath("Nabe")
+
+[node name="Nabe" type="Node3D" parent="RadHintenLinks"]
+
+[node name="Reifen" type="MeshInstance3D" parent="RadHintenLinks/Nabe"]
+transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("Mesh_reifen")
+
+[node name="Speiche" type="MeshInstance3D" parent="RadHintenLinks/Nabe"]
+mesh = SubResource("Mesh_speiche")
+
+[node name="RadHintenRechts" type="RayCast3D" parent="." node_paths=PackedStringArray("wheel_node")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.52, 1.1)
+script = ExtResource("2_rad")
+wheel_node = NodePath("Nabe")
+
+[node name="Nabe" type="Node3D" parent="RadHintenRechts"]
+
+[node name="Reifen" type="MeshInstance3D" parent="RadHintenRechts/Nabe"]
+transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("Mesh_reifen")
+
+[node name="Speiche" type="MeshInstance3D" parent="RadHintenRechts/Nabe"]
+mesh = SubResource("Mesh_speiche")
+
+; --- Kamera und Ton ------------------------------------------------------
+
+[node name="Kamerarig" parent="." node_paths=PackedStringArray("ziel") instance=ExtResource("3_kamera")]
+ziel = NodePath("..")
+
+[node name="Motorton" parent="." node_paths=PackedStringArray("vehicle") instance=ExtResource("4_motorton")]
+max_db = -20.0
+vehicle = NodePath("..")

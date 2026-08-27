@@ -1,0 +1,32 @@
+[gd_resource type="Environment" load_steps=3 format=3]
+
+; Spielzeug-Look, Startwerte.
+; Harte Schatten und satte Farben lassen eine Szene klein wirken.
+; Bewusst NICHT drin: Bewegungsunschärfe (lässt alles groß wirken) und Glow.
+; Die Tiefenschärfe sitzt nicht hier, sondern an der Kamera:
+; res://optik/miniatur_kamera.tres
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_himmel"]
+sky_top_color = Color(0.29, 0.45, 0.68, 1)
+sky_horizon_color = Color(0.72, 0.78, 0.84, 1)
+sky_energy_multiplier = 0.9
+ground_bottom_color = Color(0.33, 0.31, 0.29, 1)
+ground_horizon_color = Color(0.62, 0.6, 0.57, 1)
+
+[sub_resource type="Sky" id="Sky_himmel"]
+sky_material = SubResource("ProceduralSkyMaterial_himmel")
+
+[resource]
+background_mode = 2
+sky = SubResource("Sky_himmel")
+ambient_light_source = 3
+ambient_light_energy = 0.7
+tonemap_mode = 3
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 1.6
+ssao_intensity = 2.4
+ssao_power = 1.5
+adjustment_enabled = true
+adjustment_contrast = 1.08
+adjustment_saturation = 1.25
