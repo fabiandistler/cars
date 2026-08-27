@@ -164,15 +164,25 @@ Bei 5 h/Woche, netto vier:
 
 ### Was Block 1 festgelegt hat
 
-Die Wand steht bei `z = -60`, ist **2,4 Einheiten hoch** und besteht aus 51
-eingefrorenen `RigidBody3D` à 8 Einheiten Breite. Drei Zahlen, die im Plan
+Die Wand steht bei `z = -60`, ist **2,4 Einheiten hoch** und besteht aus 50
+eingefrorenen `RigidBody3D` à 8 Einheiten Breite. Vier Befunde, die im Plan
 nicht standen und die jetzt Abhängigkeiten sind:
 
 - **Die Höhe hängt an der Kamera.** Gemessen: Auto ruht bei `y = 0.07`,
   Dachkante ~1,84, Kamera-Auge 2,37 im Stand und 2,98 bei Tempo. 2,4 liegt
-  über dem Dach und über dem Stand-Auge, aber unter dem Tempo-Auge — im
-  Anfahren sieht man darüber, davor stehend nicht. Wer `abstand_tempo`, die
-  Federarm-Neigung oder die Autohöhe ändert, ändert die Wand mit.
+  über dem Dach und über dem Stand-Auge, aber unter dem Tempo-Auge. Wer
+  `abstand_tempo`, die Federarm-Neigung oder die Autohöhe ändert, ändert die
+  Wand mit — die Kamera ist hier ein Bauteil, keine Optik.
+- **Die Sichtlinie ist schmaler als der Plan annahm.** Bei Tempo liegt das
+  Auge nur 0,58 über der Oberkante. Der verdeckte Bodenstreifen dahinter ist
+  rund 4,1 mal der Abstand Kamera–Wand; aus typischer Anfahrt sind das etwa
+  124 Einheiten, und hinter der Wand liegen nur 142. Vom **Boden** dahinter
+  sieht man im Anfahren also praktisch nichts — sichtbar ist nur, was die
+  Linie `y = 2,4` überragt.
+  → **Auflage an Block 5: Der Köder muss über 2,4 hinausragen.** Etwas, das
+  flach am Boden liegt, ist aus der Anfahrt unsichtbar. Ob die Wand *als
+  Schloss lesbar* ist, bleibt trotzdem offen — das kann nur Fabian beim
+  Fahren feststellen.
 - **Die Dichtheit hängt an der Geometrie, nicht an der Höhe.** Das einzige
   Sprunggerät der Kiste ist die Rampe bei `z = -95` — sie liegt *hinter* der
   Wand und ist ein `StaticBody3D`, lässt sich also nicht davorschieben. Wer
@@ -181,7 +191,10 @@ nicht standen und die jetzt Abhängigkeiten sind:
 - **Block 4 ist vorbereitet.** Die Klötze sind keine `StaticBody3D`, sondern
   `RigidBody3D` mit `freeze = true`. Godot kann die Klasse eines Knotens zur
   Laufzeit nicht wechseln — der Zerfall ist deshalb `freeze = false` auf den
-  getroffenen Klötzen statt eines Neubaus.
+  getroffenen Klötzen statt eines Neubaus. Preis dieser Bauweise: **kein
+  Klotz darf einen anderen Körper durchdringen.** Eingefroren fällt eine
+  Durchdringung nicht auf, beim Auftauen schleudert sie den Klotz heraus.
+  Deshalb endet die Wand bündig bei ±200 und steckt nicht in den Seitenwänden.
 
 Block 0 steht bewusst zuerst. Der Rammbock ist das erste sichtbare Anbauteil —
 er ist damit die Probe darauf, ob die gewählte Karosserie Anbauten überhaupt
