@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 ; ---------------------------------------------------------------------------
 ; Spielzeugauto — Slice 0 / Slice 1
@@ -56,6 +56,8 @@
 [ext_resource type="PackedScene" path="res://addons/gevp/scenes/engine_sound.tscn" id="4_motorton"]
 [ext_resource type="PackedScene" path="res://fremd/kenney_toy_car_kit/vehicle-truck.glb" id="5_karosserie"]
 [ext_resource type="PackedScene" path="res://fremd/kenney_toy_car_kit/wheel-small.glb" id="6_rad_modell"]
+[ext_resource type="PackedScene" path="res://auto/rammbock.tscn" id="7_rammbock"]
+[ext_resource type="Script" path="res://auto/rammbock_wirkung.gd" id="8_wirkung"]
 
 ; Drehmomentkurve des Arcade-Presets, unverändert übernommen.
 [sub_resource type="Curve" id="Curve_drehmoment"]
@@ -64,6 +66,17 @@ point_count = 3
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_karosserie"]
 size = Vector3(1.9, 1.35, 3.9)
+
+; --- Rammbock (Slice 1) --------------------------------------------------
+; Die Geometrie steht in auto/rammbock.tscn, weil das Fundstück dieselbe
+; benutzt. Hier nur die Kollisionsform, die genau den Balken abdeckt.
+[sub_resource type="BoxShape3D" id="BoxShape3D_rammbock"]
+size = Vector3(2.2, 0.55, 0.35)
+
+; Auslösebereich für den Zerfall. Etwas größer als der Balken, damit ein
+; Streifschuss zählt.
+[sub_resource type="BoxShape3D" id="BoxShape3D_wirkung"]
+size = Vector3(2.4, 0.9, 0.6)
 
 [node name="Spielzeugauto" type="RigidBody3D" node_paths=PackedStringArray("front_left_wheel", "front_right_wheel", "rear_left_wheel", "rear_right_wheel")]
 collision_layer = 2
@@ -153,6 +166,53 @@ visible = false
 
 [node name="wheel-br" parent="Karosserie/vehicle-truck" index="3"]
 visible = false
+
+; --- Rammbock: Slice 1, Block 2 ------------------------------------------
+; Sitzt AUSSEN am Auto. Keine Zeile im fremden Controller — das ist die Regel
+; aus CLAUDE.md, und sie ist der Grund für diesen Aufbau.
+;
+; Startzustand: "Rammbock" unsichtbar, "RammbockKollision" disabled,
+; "RammbockWirkung" nicht überwachend. welt/fundstueck.gd schaltet alle drei
+; beim Aufsammeln an — an EINER Stelle, damit das Teil nicht halb an sein kann. Das ist der ganze "Einbau" — kein Slot, kein Inventar.
+; Bei genau einem Teil ist jede Verwaltung Selbstzweck (SLICE1.md).
+;
+; Die Vorderkante der Karosserie liegt bei z = -2,0. Der Balken sitzt bei -2,18
+; und ragt damit knapp 0,23 vor den Kollisionskasten (Vorderkante -1,95).
+;
+; ACHTUNG: Die zusätzliche CollisionShape3D verändert den Trägheitstensor des
+; RigidBody3D, auch ohne eigene Masse — Godot rechnet die Trägheit aus den
+; Formen. Deshalb ist sie im Ruhezustand disabled, und deshalb ist "die Masse
+; des Rammbocks auf 0 setzen" (SLICE1.md, Risikozeile) nicht die ganze Miete.
+; Gemessen ist beides: siehe Commit.
+; Sichtbarkeit wird am Elternknoten geschaltet — visible vererbt sich nach unten.
+[node name="Rammbock" parent="." instance=ExtResource("7_rammbock")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -2.18)
+visible = false
+
+; DIREKTES Kind des RigidBody3D, nicht unter "Rammbock". Godot registriert nur
+; CollisionShape3D, die unmittelbar unter dem CollisionObject3D hängen — unter
+; einem Node3D verschachtelt wird die Form stillschweigend ignoriert. Geprüft:
+; body_get_shape_count() lieferte in der verschachtelten Fassung 1 statt 2.
+[node name="RammbockKollision" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -2.18)
+shape = SubResource("BoxShape3D_rammbock")
+disabled = true
+
+; Der Auslöser für den Zerfall der Barriere (Block 4). Horcht auf Ebene 1 (Welt)
+; und liegt selbst auf keiner Ebene.
+;
+; monitoring startet AUS. Ein unsichtbarer Area3D wäre trotzdem scharf —
+; Sichtbarkeit schaltet keine Bereiche ab. Ohne diese Zeile würde die Barriere
+; zerfallen, bevor der Rammbock überhaupt gefunden ist.
+[node name="RammbockWirkung" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, -2.18)
+collision_layer = 0
+collision_mask = 1
+monitoring = false
+script = ExtResource("8_wirkung")
+
+[node name="Kollision" type="CollisionShape3D" parent="RammbockWirkung"]
+shape = SubResource("BoxShape3D_wirkung")
 
 ; --- Räder: RayCast3D am oberen Federende, -Z ist vorne -------------------
 ; Die Reichweite des Raycasts setzt wheel.gd selbst auf Federweg + Reifenradius.

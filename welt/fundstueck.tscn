@@ -1,0 +1,46 @@
+[gd_scene load_steps=4 format=3]
+
+; ---------------------------------------------------------------------------
+; FUNDSTÜCK — der Rammbock, bevor er am Auto sitzt. Slice 1, Block 3.
+;
+; Die Geometrie kommt aus auto/rammbock.tscn, derselben Szene, die auch an der
+; Front des Autos hängt. Das ist der ganze Hinweis: kein Symbol, kein Pfeil,
+; keine Schrift. Wer das Ding am Boden sieht und später am Auto, versteht es
+; ohne Text — genau das prüft die Abnahmefrage von Slice 1.
+;
+; DER BEREICH liegt auf KEINER Kollisionsebene und horcht nur auf Ebene 2, dem
+; Auto. Er ist ein Auslöser, kein Hindernis: man kann nicht dagegenstoßen, und
+; der SpringArm3D der Kamera hängt sich nicht daran auf (geprüft — SpringArm3D
+; erfasst grundsätzlich keine Area3D).
+;
+; Er ist bewusst großzügig (6 x 4 x 6 gegen ein 2,2 breites Teil). Ein Fundstück,
+; an dem man dreimal knapp vorbeifährt, erzeugt keinen Moment, sondern Ärger.
+;
+; DIE LAGE: abseits der Ideallinie zur Barriere, aber im offenen Feld des
+; Startbereichs und aus dem Startpunkt sichtbar (52 Einheiten entfernt, gut
+; innerhalb der scharfen Zone der Tiefenschärfe). Kein Marker, kein Licht —
+; SLICE1.md verlangt "findbar ohne dass es angezeigt wird".
+;
+; Frei von allen Hindernissen der Kiste — mit intersect_shape gegen die ganze
+; Szene geprüft, nicht nach Augenmaß gesetzt.
+; ---------------------------------------------------------------------------
+
+[ext_resource type="PackedScene" path="res://auto/rammbock.tscn" id="1_rammbock"]
+[ext_resource type="Script" path="res://welt/fundstueck.gd" id="2_skript"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bereich"]
+size = Vector3(6, 4, 6)
+
+[node name="Fundstueck" type="Area3D"]
+collision_layer = 0
+collision_mask = 2
+script = ExtResource("2_skript")
+
+[node name="Bereich" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+shape = SubResource("BoxShape3D_bereich")
+
+; Liegt auf dem Boden, leicht verdreht — es wurde hier fallen gelassen,
+; nicht ausgestellt. Balkenhöhe 0,55, also Mitte bei 0,275.
+[node name="Teil" parent="." instance=ExtResource("1_rammbock")]
+transform = Transform3D(0.906308, 0, -0.422618, 0, 1, 0, 0.422618, 0, 0.906308, 0, 0.275, 0)

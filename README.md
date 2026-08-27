@@ -46,11 +46,16 @@ Gamepad ist ebenfalls belegt (Trigger, linker Stick, A/X/Y).
 
 ```
 auto/spielzeugauto.tscn     Das Auto. HIER sitzen alle Fahrparameter.
-fremd/kenney_toy_car_kit/   Karosserie- und Radmodell (Kenney, CC0)
+auto/rammbock.tscn          Der Rammbock. Einmal definiert, zweimal benutzt.
+auto/rammbock_wirkung.gd    Zerfall der Barriere beim Treffer
+fremd/kenney_toy_car_kit/   Karosserie, Rad und Bäume (Kenney, CC0)
 kamera/kamerarig.tscn       Verfolgerkamera (Pivot → SpringArm3D → Camera3D)
 kamera/kamera_rig.gd        das einzige selbst geschriebene Skript im Projekt
 welt/kiste.tscn             Boden 400×400, vier Wände, Sonne, Umgebung
 welt/barriere.tscn          Das Gate aus Slice 1. Trennwand bei z = -60.
+welt/fundstueck.tscn        Der Rammbock zum Aufsammeln, bei (48, 8)
+welt/fundstueck.gd          Aufsammeln = Einbauen
+welt/hain.tscn              Was hinter der Barriere lockt
 welt/testkiste.tscn         HAUPTSZENE — Kiste + Hindernisse + Barriere
 welt/testparcours.tscn      Messstrecke. Eingefroren. Nicht ändern.
 optik/                      Tiefenschärfe und Umgebung (Spielzeug-Look)

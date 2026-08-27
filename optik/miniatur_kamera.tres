@@ -3,12 +3,32 @@
 ; Tilt-Shift: schmaler scharfer Bereich um das Auto herum, nah und fern unscharf.
 ; Das ist der ganze Miniatur-Trick. Keine Bewegungsunschärfe — die lässt alles groß wirken.
 ; Werte sind Startwerte, kein Ergebnis. Im Inspector unter "DOF Blur".
+;
+; KORRIGIERT 2026-08-27 nach der ersten Fahrt: dof_blur_far_distance stand auf
+; 20 bei einer Übergangsbreite von 10. Die Kamera hängt aber selbst schon 7,5
+; bis 11 Einheiten hinter dem Auto — scharf war damit nur ein schmaler Ring um
+; das Auto, ab etwa 10 Einheiten vor der Stoßstange war alles unscharf.
+;
+; Das war nicht nur unangenehm, es hat auch das Gate aus Slice 1 verdeckt: die
+; Barriere steht 120 Einheiten vor dem Startpunkt und lag damit tief im vollen
+; Weichzeichner. Die durchgerechnete Sichtlinie über die Wand konnte man gar
+; nicht sehen.
+;
+; Jetzt: scharf bis 140, voll unscharf ab 230. Die Kiste ist 400 Einheiten breit,
+; die Gegenwand bleibt also weich, der ganze Spielraum davor ist scharf.
+;
+; ZUM SELBER DREHEN — das ist Fabians Entscheidung, nicht meine:
+;   dof_blur_far_distance    ab hier beginnt die Unschärfe. Kleiner = mehr
+;                            Miniatur, aber weniger Übersicht. Unter ~120 ist
+;                            die Barriere wieder verdeckt.
+;   dof_blur_far_transition  wie weich der Übergang ist. Groß = unauffällig.
+;   dof_blur_amount          Stärke. 0,12 war der alte Wert, 0,10 ist ruhiger.
 
 [resource]
 dof_blur_far_enabled = true
-dof_blur_far_distance = 20.0
-dof_blur_far_transition = 10.0
+dof_blur_far_distance = 140.0
+dof_blur_far_transition = 90.0
 dof_blur_near_enabled = true
 dof_blur_near_distance = 4.5
 dof_blur_near_transition = 2.5
-dof_blur_amount = 0.12
+dof_blur_amount = 0.1

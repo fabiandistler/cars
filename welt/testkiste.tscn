@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=20 format=3]
 
 ; ---------------------------------------------------------------------------
 ; TESTKISTE — Hauptszene. Abnahmeszene für Slice 0 und Slice 1.
@@ -9,7 +9,9 @@
 ; Slice 1 (offen): Gegen die Barriere fahren, scheitern, den Rammbock finden,
 ;   einbauen, durchkommen — und das Durchkommen fühlt sich verdient an. Siehe
 ;   SLICE1.md. Die Barriere teilt die Kiste bei z = -60; sie ist das Gate.
-;   Alles nördlich davon (Rampe, Quader1) ist bis zum Durchbruch unerreichbar.
+;   Alles nördlich davon (Rampe, Quader1, Hain) ist bis zum Durchbruch
+;   unerreichbar. Der Rammbock liegt als "Fundstueck" bei (48, 8) im
+;   Startbereich; ihn zu berühren montiert ihn ans Auto.
 ;
 ; Hier wird nichts gemessen. Gemessen wird in welt/testparcours.tscn.
 ;
@@ -20,6 +22,8 @@
 
 [ext_resource type="PackedScene" path="res://welt/kiste.tscn" id="1_kiste"]
 [ext_resource type="PackedScene" path="res://welt/barriere.tscn" id="7_barriere"]
+[ext_resource type="PackedScene" path="res://welt/fundstueck.tscn" id="8_fundstueck"]
+[ext_resource type="PackedScene" path="res://welt/hain.tscn" id="9_hain"]
 [ext_resource type="Script" path="res://addons/gevp/scripts/vehicle_controllergd.gd" id="2_steuerung"]
 [ext_resource type="PackedScene" path="res://auto/spielzeugauto.tscn" id="3_auto"]
 [ext_resource type="Script" path="res://addons/gevp/scripts/gui.gd" id="4_anzeige"]
@@ -68,6 +72,13 @@ size = Vector3(24, 2, 22)
 
 ; --- Das Gate. Position und Höhe sind in welt/barriere.tscn begründet. -----
 [node name="Barriere" parent="." instance=ExtResource("7_barriere")]
+
+; --- Der Schlüssel. Liegt abseits im Startbereich, ohne Marker. ------------
+[node name="Fundstueck" parent="." instance=ExtResource("8_fundstueck")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 0, 8)
+
+; --- Was hinter der Barriere lockt. Überragt die Wand, siehe welt/hain.tscn.
+[node name="Hain" parent="." instance=ExtResource("9_hain")]
 
 ; --- Hindernisse. Eine Handvoll, mehr nicht. -----------------------------
 [node name="Hindernisse" type="Node3D" parent="."]

@@ -33,6 +33,16 @@ extends Node3D
 ## Ab diesem Tempo (Einheiten/s) gilt der volle Abstand.
 @export var tempo_voller_abstand := 22.0
 
+@export_group("Ruck")
+## Auslenkung eines Stoßes, in Einheiten. Wird von welt/fundstueck.gd ausgelöst
+## und ist die einzige Rückmeldung beim Aufsammeln — Ton gibt es in diesem
+## Slice nicht (CLAUDE.md).
+@export var ruck_staerke := 0.4
+## Wie schnell der Ruck abklingt, in 1/s. Groß = kurz und trocken.
+@export var ruck_abklingen := 7.0
+## Schwingungen pro Sekunde während des Rucks.
+@export var ruck_frequenz := 6.0
+
 @export_group("Sichtfeld")
 ## Sichtfeld im Stand, in Grad.
 @export var sichtfeld_still := 62.0
@@ -43,6 +53,8 @@ extends Node3D
 @onready var kamera : Camera3D = $Federarm/Kamera
 
 var gierung := 0.0
+var ruck := 0.0
+var ruck_zeit := 0.0
 
 func _ready() -> void:
 	top_level = true
@@ -57,7 +69,7 @@ func _process(delta : float) -> void:
 	var ziel_gierung := gierung_der_karosserie()
 	## Rahmenratenunabhängige exponentielle Dämpfung.
 	gierung = lerp_angle(gierung, ziel_gierung, 1.0 - exp(-gierung_daempfung * delta))
-	global_transform = Transform3D(Basis(Vector3.UP, gierung), ziel.global_position)
+	global_transform = Transform3D(Basis(Vector3.UP, gierung), ziel.global_position + ruck_versatz(delta))
 
 	var tempo := 0.0
 	if ziel is RigidBody3D:
@@ -65,6 +77,22 @@ func _process(delta : float) -> void:
 	var anteil := clampf(tempo / maxf(tempo_voller_abstand, 0.001), 0.0, 1.0)
 	federarm.spring_length = lerpf(abstand_still, abstand_tempo, anteil)
 	kamera.fov = lerpf(sichtfeld_still, sichtfeld_tempo, anteil)
+
+## Kurzer Stoß auf die Kamera. Wird von außen aufgerufen, wenn im Spiel etwas
+## passiert, das man spüren soll — in Slice 1 genau einmal, beim Aufsammeln
+## des Rammbocks.
+func stoss() -> void:
+	ruck = ruck_staerke
+	ruck_zeit = 0.0
+
+## Abklingende Auf-und-ab-Auslenkung. Liefert Null, sobald nichts mehr ansteht,
+## damit die Kamera im Normalfall exakt so ruhig bleibt wie vorher.
+func ruck_versatz(delta : float) -> Vector3:
+	if ruck <= 0.001:
+		return Vector3.ZERO
+	ruck = lerpf(ruck, 0.0, 1.0 - exp(-ruck_abklingen * delta))
+	ruck_zeit += delta
+	return Vector3.UP * sin(ruck_zeit * TAU * ruck_frequenz) * ruck
 
 ## Gierwinkel aus der Karosserie-Z-Achse, flach auf die Bodenebene projiziert.
 ## Bei überschlagenem oder senkrecht stehendem Auto bleibt der letzte Winkel stehen.

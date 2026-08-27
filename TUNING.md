@@ -171,6 +171,6 @@ der Fahrtrichtung. Deshalb schlägt die Kamera beim Rückwärtsfahren nicht um.
 
 | Datei | Was |
 |---|---|
-| `optik/miniatur_kamera.tres` | Tiefenschärfe (Tilt-Shift). Nah 4,5 / fern 20,0, Stärke 0,12. Schmaler scharfer Bereich = Miniatur-Effekt. Im Inspector unter *DOF Blur*. |
+| `optik/miniatur_kamera.tres` | Tiefenschärfe (Tilt-Shift). Nah 4,5 / **fern 140,0 mit Übergang 90**, Stärke 0,10. Im Inspector unter *DOF Blur*. **Korrigiert am 27.08.2026:** fern stand auf 20 bei Übergang 10 — die Kamera hängt aber selbst schon 7,5–11 hinter dem Auto, scharf war also nur ein Ring von etwa 10 Einheiten vor der Stoßstange. Das verdeckte auch die Barriere aus Slice 1, die 120 Einheiten vor dem Start steht. Unter ~120 ist sie wieder unsichtbar. |
 | `optik/miniatur_umgebung.tres` | Sättigung 1,25, Kontrast 1,08, ACES-Tonemapping, SSAO. Bewusst **keine** Bewegungsunschärfe — die lässt alles groß wirken. Bewusst kein Glow. |
 | `welt/kiste.tscn` → `Sonne` | Harte, kontrastreiche Schatten (`shadow_blur = 0.5`). |

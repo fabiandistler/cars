@@ -1,0 +1,104 @@
+[gd_scene load_steps=4 format=3]
+
+; ---------------------------------------------------------------------------
+; HAIN — was hinter der Barriere lockt. Slice 1, Block 5.
+;
+; Kein Level-Design und keine zweite Region: vier Bäume und ein warmes Licht.
+; Das ist die kleinste Sache, die die Frage beantwortet, ob eine Grenze lesbar
+; ist. Alles Größere wäre der Scope-Drift, vor dem SLICE1.md ausdrücklich warnt
+; ("wenn schon eine Barriere, dann auch gleich eine Region").
+;
+; WARUM BÄUME UND KEIN TORBOGEN
+; Das Kit hätte auch einen Zielbogen (5,4 hoch, unübersehbar). Der liest sich
+; aber als Rennziel, und dieses Spiel ist kein Rennen. Bäume sagen "da ist ein
+; Ort" statt "da ist eine Ziellinie" — und ein Garten steht ohnehin auf der
+; Regionenliste in CONTEXT.md.
+;
+; WARUM SIE ÜBERHAUPT SICHTBAR SIND — die Auflage aus Block 1:
+; Die Wand ist 2,40 hoch, das Kamera-Auge bei Tempo 2,98. Der Sehstrahl, der
+; die Oberkante streift, liegt auf Höhe der Bäume (rund 20 Einheiten dahinter)
+; bei etwa y = 2,3. Alles darunter ist von der Wand verdeckt.
+;
+;   Baumhöhe 3,85 (Maßstab 4,637681 wie beim Truck)  ->  1,5 Einheiten über
+;   der Sichtlinie. Sie ragen sichtbar über die Wand, der Boden dahinter nicht.
+;
+;   => Wer die Bäume kleiner skaliert oder tiefer setzt, macht den Köder
+;      unsichtbar und Block 5 wertlos.
+;
+; WARUM SIE NICHT WEITER HINTEN STEHEN
+; Die Tiefenschärfe ist ab 140 Einheiten weich und ab 230 voll. Vom Startpunkt
+; sind es rund 127 Einheiten bis zur Wand; bei z = -78 liegen die Bäume etwa
+; 147 entfernt und damit gerade noch fast scharf. Deutlich weiter hinten wären
+; sie Matsch.
+;
+; KOLLISION: Stamm als Zylinder, erste Gruppe "Road". Ohne diese Gruppe läuft
+; wheel.gd in einen Dictionary-Fehler, sobald ein Rad den Stamm berührt. Die
+; Krone ist absichtlich ohne Kollision — durch Blätter fährt man.
+;
+; Frei von Boden, Rampe und Barriere — mit intersect_shape geprüft.
+; ---------------------------------------------------------------------------
+
+[ext_resource type="PackedScene" path="res://fremd/kenney_toy_car_kit/tree-pine.glb" id="1_kiefer"]
+[ext_resource type="PackedScene" path="res://fremd/kenney_toy_car_kit/tree.glb" id="2_baum"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_stamm"]
+height = 1.6
+radius = 0.35
+
+[node name="Hain" type="Node3D"]
+
+[node name="Kiefer1" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, -76)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Stamm" type="CollisionShape3D" parent="Kiefer1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("CylinderShape3D_stamm")
+
+[node name="Modell" parent="Kiefer1" instance=ExtResource("1_kiefer")]
+transform = Transform3D(4.637681, 0, 0, 0, 4.637681, 0, 0, 0, 4.637681, 0, 0, 0)
+
+[node name="Kiefer2" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 4, 0, -82)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Stamm" type="CollisionShape3D" parent="Kiefer2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("CylinderShape3D_stamm")
+
+[node name="Modell" parent="Kiefer2" instance=ExtResource("1_kiefer")]
+transform = Transform3D(4.637681, 0, 0, 0, 4.637681, 0, 0, 0, 4.637681, 0, 0, 0)
+
+[node name="Baum1" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(0.707107, 0, -0.707107, 0, 1, 0, 0.707107, 0, 0.707107, 15, 0, -74)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Stamm" type="CollisionShape3D" parent="Baum1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("CylinderShape3D_stamm")
+
+[node name="Modell" parent="Baum1" instance=ExtResource("2_baum")]
+transform = Transform3D(4.637681, 0, 0, 0, 4.637681, 0, 0, 0, 4.637681, 0, 0, 0)
+
+[node name="Baum2" type="StaticBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -70)
+collision_layer = 1
+collision_mask = 1
+
+[node name="Stamm" type="CollisionShape3D" parent="Baum2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("CylinderShape3D_stamm")
+
+[node name="Modell" parent="Baum2" instance=ExtResource("2_baum")]
+transform = Transform3D(4.637681, 0, 0, 0, 4.637681, 0, 0, 0, 4.637681, 0, 0, 0)
+
+; Warmes Licht über dem Hain. Es beleuchtet nichts Wichtiges — es zieht den
+; Blick. Reichweite bewusst klein, damit es die Barriere nicht mit anleuchtet.
+[node name="Licht" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 9, -76)
+light_color = Color(1, 0.85, 0.6, 1)
+light_energy = 3.5
+omni_range = 34.0

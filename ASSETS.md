@@ -13,7 +13,7 @@ Hobbyprojekte nicht veröffentlicht werden können.
 | Motorgeräusch `4000.wav` | Teil des Add-ons oben | MIT (mit dem Add-on) | 2026-08-27 | `addons/gevp/sounds/` |
 | Demo-Automodell im Add-on (`sedanSports`) | Kenney Car Kit, im Add-on eingebettet | CC0 | 2026-08-27 | `addons/gevp/scenes/*_car.tscn` — nur in den Demos, nicht im Spiel |
 | Godot-`.gitignore`-Vorlage | <https://github.com/github/gitignore> `Godot.gitignore` | CC0 | 2026-08-27 | `.gitignore` |
-| Kenney Toy Car Kit 1.2 | <https://kenney.nl/assets/toy-car-kit>, Ausgabedatum 2025-01-05 | CC0 — Namensnennung nicht erforderlich, siehe `fremd/kenney_toy_car_kit/License.txt` | 2026-08-27 | `fremd/kenney_toy_car_kit/` — übernommen sind nur `vehicle-truck.glb`, `wheel-small.glb` und `Textures/colormap.png`, nicht das ganze Kit |
+| Kenney Toy Car Kit 1.2 | <https://kenney.nl/assets/toy-car-kit>, Ausgabedatum 2025-01-05 | CC0 — Namensnennung nicht erforderlich, siehe `fremd/kenney_toy_car_kit/License.txt` | 2026-08-27 | `fremd/kenney_toy_car_kit/` — übernommen sind nur `vehicle-truck.glb`, `wheel-small.glb`, `tree.glb`, `tree-pine.glb` und `Textures/colormap.png`, nicht das ganze Kit |
 
 ## Zum Kenney-Kit
 
@@ -25,6 +25,9 @@ Repo zu legen macht die Herkunftsfrage später unübersichtlich, nicht klarer.
   flache Kastenaufbau trägt die sichtbaren Anbauteile ab Slice 1 (Rammbock,
   später Rotor und Greifer). Die Rennwagensilhouetten im Kit tragen sie nicht.
 - **`wheel-small.glb`** ist das Radmodell, das der Truck selbst benutzt.
+- **`tree.glb` und `tree-pine.glb`** bilden den Hain hinter der Barriere — der
+  Köder aus Slice 1, Block 5. Sie sind die einzigen Modelle im Projekt, die
+  keine Funktion haben außer gesehen zu werden.
 - **`Textures/colormap.png`** wird von beiden GLB-Dateien **relativ** referenziert.
   Der Unterordner `Textures/` muss neben den GLB-Dateien liegen, sonst sind die
   Modelle unbemalt.

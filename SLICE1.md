@@ -155,11 +155,11 @@ Bei 5 h/Woche, netto vier:
 |---|---|---|---|---|
 | 0 | **Karosserie entscheiden** und Kenney Toy Car Kit einbauen (glTF/GLB), `ASSETS.md`-Zeile | 3 | Platzhalter raus | **fertig** — Kenney `vehicle-truck` |
 | 1 | Barriere: Geometrie, Höhe, Sichtlinie darüber, statisch | 3 | Auto prallt ab, jedes Mal | **fertig** — `welt/barriere.tscn` |
-| 2 | Rammbock am Auto: Mesh, Kollisionsform, Position | 3 | sichtbar montiert | offen |
-| 3 | Fundstück + Aufnahme (Area3D, Sichtbarkeit umschalten) | 2 | Schleife geschlossen | offen |
-| 4 | Zerfall der Barriere beim Treffer | 2 | Durchbruch sieht gut aus | offen |
-| 5 | Lesbarkeit: Platzierung, Licht, was hinter der Barriere lockt. **Zwei Auflagen aus Block 0/1:** der Köder muss über `y = 2,4` hinausragen, sonst ist er aus der Anfahrt unsichtbar; und die Wand liegt 0,035 unter der Dachkante des Trucks — hier entscheidet sich, ob sie so lesbar ist oder 0,3–0,5 höher gehört | 3 | ohne Erklärung verständlich | offen |
-| 6 | Zehn Minuten fahren, entscheiden | 1 | bestanden / nicht bestanden | offen |
+| 2 | Rammbock am Auto: Mesh, Kollisionsform, Position | 3 | sichtbar montiert | **fertig** — `auto/rammbock.tscn` |
+| 3 | Fundstück + Aufnahme (Area3D, Sichtbarkeit umschalten) | 2 | Schleife geschlossen | **fertig** — `welt/fundstueck.tscn` |
+| 4 | Zerfall der Barriere beim Treffer | 2 | Durchbruch sieht gut aus | **fertig** — `auto/rammbock_wirkung.gd` |
+| 5 | Lesbarkeit: Platzierung, Licht, was hinter der Barriere lockt. **Zwei Auflagen aus Block 0/1:** der Köder muss über `y = 2,4` hinausragen, sonst ist er aus der Anfahrt unsichtbar; und die Wand liegt 0,035 unter der Dachkante des Trucks — hier entscheidet sich, ob sie so lesbar ist oder 0,3–0,5 höher gehört | 3 | ohne Erklärung verständlich | **fertig** — `welt/hain.tscn` |
+| 6 | Zehn Minuten fahren, entscheiden | 1 | bestanden / nicht bestanden | **du** |
 | | **Summe** | **17** | **≈ 4–5 Wochen** | |
 
 ### Was Block 1 festgelegt hat
