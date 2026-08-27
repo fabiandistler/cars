@@ -49,7 +49,8 @@ auto/spielzeugauto.tscn     Das Auto. HIER sitzen alle Fahrparameter.
 kamera/kamerarig.tscn       Verfolgerkamera (Pivot → SpringArm3D → Camera3D)
 kamera/kamera_rig.gd        das einzige selbst geschriebene Skript im Projekt
 welt/kiste.tscn             Boden 400×400, vier Wände, Sonne, Umgebung
-welt/testkiste.tscn         HAUPTSZENE — leere Kiste + ein paar Hindernisse
+welt/barriere.tscn          Das Gate aus Slice 1. Trennwand bei z = -60.
+welt/testkiste.tscn         HAUPTSZENE — Kiste + Hindernisse + Barriere
 welt/testparcours.tscn      Messstrecke. Eingefroren. Nicht ändern.
 optik/                      Tiefenschärfe und Umgebung (Spielzeug-Look)
 addons/gevp/                Fremder Fahrzeug-Controller (MIT). Nicht anfassen.

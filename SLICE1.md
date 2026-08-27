@@ -151,16 +151,37 @@ Währung. Kommt in Slice 2 mit der Leine.
 
 Bei 5 h/Woche, netto vier:
 
-| # | Block | h | Ergebnis |
-|---|---|---|---|
-| 0 | **Karosserie entscheiden** und Kenney Toy Car Kit einbauen (glTF/GLB), `ASSETS.md`-Zeile | 3 | Platzhalter raus |
-| 1 | Barriere: Geometrie, Höhe, Sichtlinie darüber, statisch | 3 | Auto prallt ab, jedes Mal |
-| 2 | Rammbock am Auto: Mesh, Kollisionsform, Position | 3 | sichtbar montiert |
-| 3 | Fundstück + Aufnahme (Area3D, Sichtbarkeit umschalten) | 2 | Schleife geschlossen |
-| 4 | Zerfall der Barriere beim Treffer | 2 | Durchbruch sieht gut aus |
-| 5 | Lesbarkeit: Platzierung, Licht, was hinter der Barriere lockt | 3 | ohne Erklärung verständlich |
-| 6 | Zehn Minuten fahren, entscheiden | 1 | bestanden / nicht bestanden |
-| | **Summe** | **17** | **≈ 4–5 Wochen** |
+| # | Block | h | Ergebnis | Stand |
+|---|---|---|---|---|
+| 0 | **Karosserie entscheiden** und Kenney Toy Car Kit einbauen (glTF/GLB), `ASSETS.md`-Zeile | 3 | Platzhalter raus | **blockiert** — Entscheidung offen |
+| 1 | Barriere: Geometrie, Höhe, Sichtlinie darüber, statisch | 3 | Auto prallt ab, jedes Mal | **fertig** — `welt/barriere.tscn` |
+| 2 | Rammbock am Auto: Mesh, Kollisionsform, Position | 3 | sichtbar montiert | offen |
+| 3 | Fundstück + Aufnahme (Area3D, Sichtbarkeit umschalten) | 2 | Schleife geschlossen | offen |
+| 4 | Zerfall der Barriere beim Treffer | 2 | Durchbruch sieht gut aus | offen |
+| 5 | Lesbarkeit: Platzierung, Licht, was hinter der Barriere lockt | 3 | ohne Erklärung verständlich | offen |
+| 6 | Zehn Minuten fahren, entscheiden | 1 | bestanden / nicht bestanden | offen |
+| | **Summe** | **17** | **≈ 4–5 Wochen** | |
+
+### Was Block 1 festgelegt hat
+
+Die Wand steht bei `z = -60`, ist **2,4 Einheiten hoch** und besteht aus 51
+eingefrorenen `RigidBody3D` à 8 Einheiten Breite. Drei Zahlen, die im Plan
+nicht standen und die jetzt Abhängigkeiten sind:
+
+- **Die Höhe hängt an der Kamera.** Gemessen: Auto ruht bei `y = 0.07`,
+  Dachkante ~1,84, Kamera-Auge 2,37 im Stand und 2,98 bei Tempo. 2,4 liegt
+  über dem Dach und über dem Stand-Auge, aber unter dem Tempo-Auge — im
+  Anfahren sieht man darüber, davor stehend nicht. Wer `abstand_tempo`, die
+  Federarm-Neigung oder die Autohöhe ändert, ändert die Wand mit.
+- **Die Dichtheit hängt an der Geometrie, nicht an der Höhe.** Das einzige
+  Sprunggerät der Kiste ist die Rampe bei `z = -95` — sie liegt *hinter* der
+  Wand und ist ein `StaticBody3D`, lässt sich also nicht davorschieben. Wer
+  die Wand nach Norden verschiebt (`z < -95`), macht die Rampe zur Abkürzung
+  und das Gate wertlos.
+- **Block 4 ist vorbereitet.** Die Klötze sind keine `StaticBody3D`, sondern
+  `RigidBody3D` mit `freeze = true`. Godot kann die Klasse eines Knotens zur
+  Laufzeit nicht wechseln — der Zerfall ist deshalb `freeze = false` auf den
+  getroffenen Klötzen statt eines Neubaus.
 
 Block 0 steht bewusst zuerst. Der Rammbock ist das erste sichtbare Anbauteil —
 er ist damit die Probe darauf, ob die gewählte Karosserie Anbauten überhaupt

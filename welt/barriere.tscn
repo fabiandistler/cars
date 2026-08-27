@@ -1,0 +1,749 @@
+[gd_scene load_steps=4 format=3]
+
+; ---------------------------------------------------------------------------
+; BARRIERE — das Schloss von Slice 1. Block 1.
+;
+; Eine Trennwand quer durch die Kiste bei z = -60. Sie ist das Gate: eine
+; sichtbare Grenze, die genau ein Teil aufhebt (der Rammbock, Block 2-4). Bis
+; dahin prallt das Auto ab, jedes Mal.
+;
+; WARUM 2,4 EINHEITEN HOCH
+; Die Höhe löst den Zielkonflikt aus SLICE1.md: "niedrig genug zum Drübersehen,
+; zu hoch zum Drüberfahren". Beide Hälften hängen an Zahlen, die vorher nicht
+; gemessen waren (Godot 4.7.2 headless, 27.08.2026):
+;
+;   Auto ruht bei y = 0.07, Dachkante  ~ 1,84
+;   Kamera-Auge im Stand               = 2,37
+;   Kamera-Auge bei Tempo              = 2,98   (Federarm 7,5 -> 11, 10° Neigung)
+;
+; 2,4 liegt über dem Dach — die Wand ist sichtbar höher als das Auto — und über
+; dem Auge im Stand, aber unter dem Auge bei Tempo. Im Anfahren sieht man
+; darüber hinweg, was dahinter liegt; wer davorsteht, sieht die Wand.
+;
+;   => Wer abstand_tempo, die Neigung des Federarms oder die Autohöhe ändert,
+;      ändert diese Wand mit. Die Kamera ist hier ein Bauteil, keine Optik.
+;
+; WARUM DIE WAND NICHT ÜBERSPRUNGEN WERDEN KANN
+; Die Höhe allein macht kein dichtes Gate — ein Auto mit genug Anlauf kommt
+; über fast alles, und ein Gate, das mit Geduld knackbar ist, ist eine
+; Ermutigung zum Exploit. Dicht wird die Wand durch die GEOMETRIE der Anfahrt:
+; das einzige Sprunggerät der Kiste ist die Rampe bei z = -95. Die liegt
+; HINTER dieser Wand und ist ein StaticBody3D, lässt sich also nicht
+; davorschieben. Auf der Startseite gibt es keine Auffahrt — die Würfel und
+; Klötze dort sind senkrechte Kästen, und der Reifenradius von 0,45 begrenzt
+; die Stufe, die ein Rad nehmen kann.
+;
+;   => Wer die Wand nach Norden verschiebt (z < -95), macht die Rampe zur
+;      Abkürzung und das Gate wertlos.
+;
+; GEMESSEN, NICHT VERMUTET
+; Sieben Vollgas-Anläufe headless, je frische Szene: frontal mit langem und
+; kurzem Anlauf, 20° schräg von beiden Seiten, dicht an West- und Ostwand,
+; und 8° schräg. Höchsttempo 41 Einheiten/s. Ergebnis: 0 Durchbrüche, das Auto
+; kommt nie weiter als z = -56,1 (Südflanke der Wand liegt bei z = -58) und
+; hebt dabei nicht ab (größte Höhe 0,17).
+;
+;   => Nicht geprüft ist, ob sich das Abprallen gut anfühlt. Das kann nur
+;      Fabian feststellen — ein Agent kann nicht fahren.
+;
+; WARUM RIGIDBODY3D UND NICHT STATICBODY3D
+; Die Klötze sind eingefrorene RigidBody3D: freeze = true, freeze_mode bleibt
+; auf dem Standard FREEZE_MODE_STATIC (= 0, gegen Godot 4.7.2 geprüft). So
+; verhalten sie sich exakt wie StaticBody3D — nichts lässt sich wegschieben,
+; egal mit wieviel Anlauf.
+;
+; Godot kann die Klasse eines Knotens zur Laufzeit nicht wechseln. Der Zerfall
+; in Block 4 ist deshalb "freeze = false" auf den getroffenen Klötzen — eine
+; Zeile statt eines Neubaus.
+;
+; GRUPPE "Road": erste Gruppe jedes Klotzes. wheel.gd liest die erste Gruppe
+; des getroffenen Colliders und schlägt damit Reifenwerte nach; fehlt sie,
+; läuft der Controller in einen Dictionary-Fehler. Gilt vor UND nach dem
+; Zerfall.
+;
+; KOLLISIONSEBENE 1 (Welt), nicht 2. Sonst hängt der SpringArm3D der Kamera an
+; der Wand fest, sobald das Auto davorsteht.
+;
+; MASSE 60 je Klotz gegen 1500 des Autos: eingefroren ohne Wirkung, beim
+; Zerfall fliegen sie weg statt zu bremsen.
+; ---------------------------------------------------------------------------
+
+[sub_resource type="StandardMaterial3D" id="Mat_barriere"]
+albedo_color = Color(0.72, 0.58, 0.2, 1)
+roughness = 0.75
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_klotz"]
+size = Vector3(8, 2.4, 4)
+
+[sub_resource type="BoxMesh" id="Mesh_klotz"]
+material = SubResource("Mat_barriere")
+size = Vector3(8, 2.4, 4)
+
+[node name="Barriere" type="Node3D"]
+
+; 51 Klötze à 8 Einheiten, x von -204 bis +204. Die Innenflächen der
+; Seitenwände liegen bei ±200, die Wand steckt also 4 Einheiten in jeder
+; Seitenwand — kein Spalt an den Rändern.
+
+[node name="Klotz01" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -200, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz01"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz01"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz02" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -192, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz02"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz02"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz03" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -184, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz03"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz03"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz04" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -176, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz04"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz04"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz05" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -168, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz05"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz05"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz06" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -160, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz06"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz06"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz07" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -152, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz07"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz07"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz08" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -144, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz08"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz08"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz09" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -136, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz09"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz09"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz10" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -128, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz10"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz10"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz11" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -120, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz11"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz11"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz12" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -112, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz12"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz12"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz13" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -104, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz13"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz13"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz14" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -96, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz14"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz14"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz15" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -88, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz15"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz15"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz16" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -80, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz16"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz16"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz17" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -72, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz17"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz17"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz18" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -64, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz18"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz18"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz19" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -56, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz19"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz19"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz20" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -48, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz20"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz20"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz21" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -40, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz21"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz21"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz22" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -32, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz22"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz22"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz23" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz23"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz23"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz24" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -16, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz24"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz24"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz25" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz25"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz25"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz26" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz26"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz26"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz27" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz27"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz27"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz28" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz28"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz28"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz29" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz29"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz29"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz30" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 32, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz30"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz30"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz31" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 40, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz31"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz31"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz32" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 48, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz32"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz32"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz33" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 56, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz33"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz33"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz34" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz34"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz34"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz35" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 72, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz35"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz35"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz36" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 80, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz36"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz36"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz37" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 88, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz37"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz37"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz38" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 96, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz38"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz38"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz39" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 104, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz39"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz39"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz40" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 112, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz40"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz40"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz41" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 120, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz41"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz41"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz42" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 128, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz42"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz42"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz43" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 136, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz43"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz43"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz44" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 144, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz44"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz44"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz45" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 152, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz45"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz45"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz46" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 160, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz46"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz46"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz47" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 168, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz47"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz47"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz48" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 176, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz48"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz48"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz49" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 184, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz49"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz49"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz50" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 192, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz50"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz50"]
+mesh = SubResource("Mesh_klotz")
+
+[node name="Klotz51" type="RigidBody3D" parent="." groups=["Road"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 200, 1.2, -60)
+collision_layer = 1
+collision_mask = 3
+mass = 60.0
+freeze = true
+
+[node name="Kollision" type="CollisionShape3D" parent="Klotz51"]
+shape = SubResource("BoxShape3D_klotz")
+
+[node name="Flaeche" type="MeshInstance3D" parent="Klotz51"]
+mesh = SubResource("Mesh_klotz")

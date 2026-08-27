@@ -1,11 +1,15 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 ; ---------------------------------------------------------------------------
-; TESTKISTE — Hauptszene. Das ist die Abnahmeszene für Slice 0.
+; TESTKISTE — Hauptszene. Abnahmeszene für Slice 0 und Slice 1.
 ;
-; Abnahmekriterium (nur Fabian kann es feststellen):
-;   Zehn Minuten ziellos herumfahren, ohne einen Parameter anzufassen,
-;   macht Spaß. Zuckt die Hand zum Inspector statt zur Lenkung: nicht bestanden.
+; Slice 0 (bestanden 2026-08-27): Zehn Minuten ziellos herumfahren, ohne einen
+;   Parameter anzufassen, macht Spaß.
+;
+; Slice 1 (offen): Gegen die Barriere fahren, scheitern, den Rammbock finden,
+;   einbauen, durchkommen — und das Durchkommen fühlt sich verdient an. Siehe
+;   SLICE1.md. Die Barriere teilt die Kiste bei z = -60; sie ist das Gate.
+;   Alles nördlich davon (Rampe, Quader1) ist bis zum Durchbruch unerreichbar.
 ;
 ; Hier wird nichts gemessen. Gemessen wird in welt/testparcours.tscn.
 ;
@@ -15,6 +19,7 @@
 ; ---------------------------------------------------------------------------
 
 [ext_resource type="PackedScene" path="res://welt/kiste.tscn" id="1_kiste"]
+[ext_resource type="PackedScene" path="res://welt/barriere.tscn" id="7_barriere"]
 [ext_resource type="Script" path="res://addons/gevp/scripts/vehicle_controllergd.gd" id="2_steuerung"]
 [ext_resource type="PackedScene" path="res://auto/spielzeugauto.tscn" id="3_auto"]
 [ext_resource type="Script" path="res://addons/gevp/scripts/gui.gd" id="4_anzeige"]
@@ -60,6 +65,9 @@ size = Vector3(24, 2, 22)
 [node name="Testkiste" type="Node3D"]
 
 [node name="Kiste" parent="." instance=ExtResource("1_kiste")]
+
+; --- Das Gate. Position und Höhe sind in welt/barriere.tscn begründet. -----
+[node name="Barriere" parent="." instance=ExtResource("7_barriere")]
 
 ; --- Hindernisse. Eine Handvoll, mehr nicht. -----------------------------
 [node name="Hindernisse" type="Node3D" parent="."]
