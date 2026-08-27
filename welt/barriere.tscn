@@ -12,12 +12,24 @@
 ; zu hoch zum Drüberfahren". Beide Hälften hängen an Zahlen, die vorher nicht
 ; gemessen waren (Godot 4.7.2 headless, 27.08.2026):
 ;
-;   Auto ruht bei y = 0.07, Dachkante  ~ 1,84
+;   Auto ruht bei y = 0.07
+;   Dachkante                          = 2,435  (Kenney-Truck, seit Block 0)
 ;   Kamera-Auge im Stand               = 2,37
 ;   Kamera-Auge bei Tempo              = 2,98   (Federarm 7,5 -> 11, 10° Neigung)
 ;
-; 2,4 liegt über dem Dach — die Wand ist sichtbar höher als das Auto — und über
-; dem Auge im Stand, aber unter dem Auge bei Tempo.
+; 2,4 liegt über dem Auge im Stand, aber unter dem Auge bei Tempo.
+;
+; ZUM DACH: Als diese Wand gebaut wurde, fuhr noch die Platzhalterkarosserie,
+; 1,84 hoch — die Wand stand sichtbar darüber. Der Truck aus Block 0 ist 2,435
+; hoch, die Wand liegt also 0,035 UNTER seiner Dachkante, praktisch auf einer
+; Linie. Das ist keine Fehlfunktion: "zu hoch zum Drüberfahren" gilt unverändert
+; (senkrechte Fläche, Reifenradius 0,45), und die Kamera hängt am Wurzelknoten,
+; nicht an der Karosserie, liegt bei Tempo also weiterhin 0,58 über der
+; Oberkante. Die Sichtlinie ist unberührt.
+;
+;   => Offen bleibt, ob eine Wand auf exakt Dachhöhe als Schloss lesbar ist
+;      oder ob sie 0,3 bis 0,5 höher gehört. Das ist eine Frage ans Auge und
+;      gehört zu Block 5 — ein Agent kann sie nicht beantworten.
 ;
 ; Was das für die Sichtlinie GENAU heißt, gerechnet statt behauptet: bei Tempo
 ; liegt das Auge 0,58 über der Oberkante. Der verdeckte Bodenstreifen hinter
@@ -53,6 +65,10 @@
 ; und 8° schräg. Höchsttempo 41 Einheiten/s. Ergebnis: 0 Durchbrüche, das Auto
 ; kommt nie weiter als z = -56,1 (Südflanke der Wand liegt bei z = -58) und
 ; hebt dabei nicht ab (größte Höhe 0,17).
+;
+; Nach dem Karosserietausch in Block 0 drei Läufe wiederholt: Zahlen auf die
+; zweite Nachkommastelle identisch. Erwartbar — der Kollisionskörper wurde nicht
+; angefasst, getauscht wurde nur, was man sieht.
 ;
 ; WARUM RIGIDBODY3D UND NICHT STATICBODY3D
 ; Die Klötze sind eingefrorene RigidBody3D: freeze = true, freeze_mode bleibt

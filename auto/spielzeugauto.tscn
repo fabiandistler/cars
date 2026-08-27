@@ -1,18 +1,44 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=9 format=3]
 
 ; ---------------------------------------------------------------------------
-; Spielzeugauto — Slice 0
+; Spielzeugauto — Slice 0 / Slice 1
 ;
 ; MASSSTAB: Das Auto ist 4 Godot-Einheiten lang. Die Welt wird mit Faktor ~57
 ; gegenüber der Realität gebaut (1 Realzentimeter ~ 0,57 Einheiten). Nicht das
 ; Auto verkleinern — Kollisionstoleranz, Federweg und Solver-Schritt sind bei
 ; sehr kleinen Körpern größer als das Fahrzeug. Siehe CONTEXT.md.
 ;
-; KAROSSERIE: Platzhalter aus Godot-Primitiven. Das Kenney Toy Car Kit ist noch
-; nicht ausgewählt (welches Auto = offene Frage). Zum Tauschen nur die drei
-; MeshInstance3D unter "Karosserie" durch das importierte Modell ersetzen und
-; die Skalierung so wählen, dass es 4 Einheiten lang bleibt. Kollisionskörper,
-; Radpositionen und Reifenradius bleiben davon unberührt.
+; KAROSSERIE: Kenney Toy Car Kit, "vehicle-truck" (CC0, siehe ASSETS.md).
+; Gewählt, weil der flache Kastenaufbau die sichtbaren Anbauteile ab Slice 1
+; trägt — Rammbock vorn, später Rotor und Greifer. Eine Rennwagensilhouette
+; trägt sie nicht.
+;
+; Rohlänge des Modells 0,8625 -> Skalierung 4/0,8625 = 4,637681 ergibt genau
+; 4 Einheiten. Der Karosserieknoten sitzt bei y = -0,067, damit die Radaufstands-
+; ebene des Modells (dort liegt sein y = 0) auf dem Boden liegt, wenn das Auto
+; in Ruhe steht. Gemessene Ruhehöhe des Wurzelknotens: y = 0,067.
+;
+; Die vier Räder des Modells hängen im GLB UNTER dem Karosserie-Mesh und sind
+; hier auf visible = false gesetzt. Sie sind starr; die sichtbaren Räder müssen
+; an den Naben hängen, weil wheel.gd dort Federung und Lenkeinschlag anzeigt.
+; Dafür ist der Knoten als "editable" markiert.
+;
+; RÄDER: "wheel-small" aus demselben Kit — das Modell, das der Truck selbst
+; benutzt. Rohradius 0,125, skaliert mit 3,6 auf Radius 0,45.
+;
+;   ACHTUNG, bewusst in Kauf genommene Abweichung: Das Modell will eigentlich
+;   Radius 0,58 (seine eigenen Räder, mit 4,637681 skaliert). Getunt ist aber
+;   0,45, und der Reifenradius hängt über TUNING.md (Kopplung 3) am
+;   Motordrehmoment. Deshalb bleibt die Physik unangetastet und das Rad wird
+;   optisch auf 0,45 gebracht — der Truck sieht dadurch etwas untergerädert
+;   aus. Wer das ändern will, ändert Fahrverhalten, nicht Optik.
+;
+;   Ebenso: Modell-Spurweite 1,74 und Radstand 2,32 gegen 1,60 / 2,20 im
+;   Projekt. Die Räder sitzen also minimal weiter innen als die Radkästen.
+;
+; KOLLISIONSKÖRPER unverändert (1,9 x 1,35 x 3,9). Die sichtbare Karosserie ist
+; breiter (2,44) und höher (2,43) als dieser Kasten. Das ist Absicht: den Kasten
+; zu ändern ändert das Fahrgefühl, und Slice 0 ist bestanden und eingefroren.
 ;
 ; FAHRHILFEN: alle aus. Siehe TUNING.md.
 ; ---------------------------------------------------------------------------
@@ -21,6 +47,8 @@
 [ext_resource type="Script" path="res://addons/gevp/scripts/wheel.gd" id="2_rad"]
 [ext_resource type="PackedScene" path="res://kamera/kamerarig.tscn" id="3_kamera"]
 [ext_resource type="PackedScene" path="res://addons/gevp/scenes/engine_sound.tscn" id="4_motorton"]
+[ext_resource type="PackedScene" path="res://fremd/kenney_toy_car_kit/vehicle-truck.glb" id="5_karosserie"]
+[ext_resource type="PackedScene" path="res://fremd/kenney_toy_car_kit/wheel-small.glb" id="6_rad_modell"]
 
 ; Drehmomentkurve des Arcade-Presets, unverändert übernommen.
 [sub_resource type="Curve" id="Curve_drehmoment"]
@@ -29,53 +57,6 @@ point_count = 3
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_karosserie"]
 size = Vector3(1.9, 1.35, 3.9)
-
-[sub_resource type="StandardMaterial3D" id="Mat_lack"]
-albedo_color = Color(0.84, 0.18, 0.21, 1)
-metallic_specular = 0.6
-roughness = 0.35
-
-[sub_resource type="StandardMaterial3D" id="Mat_dach"]
-albedo_color = Color(0.93, 0.91, 0.86, 1)
-roughness = 0.45
-
-[sub_resource type="StandardMaterial3D" id="Mat_licht"]
-albedo_color = Color(0.98, 0.86, 0.42, 1)
-roughness = 0.2
-
-[sub_resource type="StandardMaterial3D" id="Mat_reifen"]
-albedo_color = Color(0.1, 0.1, 0.11, 1)
-roughness = 0.9
-
-[sub_resource type="StandardMaterial3D" id="Mat_felge"]
-albedo_color = Color(0.78, 0.79, 0.82, 1)
-metallic = 0.6
-roughness = 0.3
-
-[sub_resource type="BoxMesh" id="Mesh_karosserie"]
-material = SubResource("Mat_lack")
-size = Vector3(2, 0.65, 4)
-
-[sub_resource type="BoxMesh" id="Mesh_dach"]
-material = SubResource("Mat_dach")
-size = Vector3(1.7, 0.55, 2)
-
-[sub_resource type="BoxMesh" id="Mesh_scheinwerfer"]
-material = SubResource("Mat_licht")
-size = Vector3(0.36, 0.22, 0.12)
-
-[sub_resource type="CylinderMesh" id="Mesh_reifen"]
-material = SubResource("Mat_reifen")
-top_radius = 0.45
-bottom_radius = 0.45
-height = 0.32
-radial_segments = 24
-rings = 1
-
-; Sichtbare Speiche — ohne sie sieht man dem schwarzen Reifen die Drehung nicht an.
-[sub_resource type="BoxMesh" id="Mesh_speiche"]
-material = SubResource("Mat_felge")
-size = Vector3(0.34, 0.76, 0.14)
 
 [node name="Spielzeugauto" type="RigidBody3D" node_paths=PackedStringArray("front_left_wheel", "front_right_wheel", "rear_left_wheel", "rear_right_wheel")]
 collision_layer = 2
@@ -149,26 +130,27 @@ rear_wheel_mass = 25.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0)
 shape = SubResource("BoxShape3D_karosserie")
 
-[node name="Karosserie" type="Node3D" parent="."]
+; --- Karosserie: Kenney "vehicle-truck", auf 4 Einheiten Länge skaliert ---
+[node name="Karosserie" parent="." instance=ExtResource("5_karosserie")]
+transform = Transform3D(4.637681, 0, 0, 0, 4.637681, 0, 0, 0, 4.637681, 0, -0.067, 0)
 
-[node name="Rumpf" type="MeshInstance3D" parent="Karosserie"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("Mesh_karosserie")
+; Die modelleigenen Räder sind starr und würden die echten doppeln.
+[node name="wheel-bl" parent="Karosserie/vehicle-truck" index="0"]
+visible = false
 
-[node name="Dach" type="MeshInstance3D" parent="Karosserie"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.25)
-mesh = SubResource("Mesh_dach")
+[node name="wheel-fr" parent="Karosserie/vehicle-truck" index="1"]
+visible = false
 
-[node name="ScheinwerferLinks" type="MeshInstance3D" parent="Karosserie"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0.95, -2)
-mesh = SubResource("Mesh_scheinwerfer")
+[node name="wheel-fl" parent="Karosserie/vehicle-truck" index="2"]
+visible = false
 
-[node name="ScheinwerferRechts" type="MeshInstance3D" parent="Karosserie"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0.95, -2)
-mesh = SubResource("Mesh_scheinwerfer")
+[node name="wheel-br" parent="Karosserie/vehicle-truck" index="3"]
+visible = false
 
 ; --- Räder: RayCast3D am oberen Federende, -Z ist vorne -------------------
 ; Die Reichweite des Raycasts setzt wheel.gd selbst auf Federweg + Reifenradius.
+; Das Radmodell hat seine Achse auf der lokalen X-Achse, wie der Controller es
+; erwartet — deshalb keine Drehung, nur Skalierung 3,6 auf Radius 0,45.
 
 [node name="RadVorneLinks" type="RayCast3D" parent="." node_paths=PackedStringArray("wheel_node")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.52, -1.1)
@@ -177,12 +159,8 @@ wheel_node = NodePath("Nabe")
 
 [node name="Nabe" type="Node3D" parent="RadVorneLinks"]
 
-[node name="Reifen" type="MeshInstance3D" parent="RadVorneLinks/Nabe"]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("Mesh_reifen")
-
-[node name="Speiche" type="MeshInstance3D" parent="RadVorneLinks/Nabe"]
-mesh = SubResource("Mesh_speiche")
+[node name="Reifen" parent="RadVorneLinks/Nabe" instance=ExtResource("6_rad_modell")]
+transform = Transform3D(3.6, 0, 0, 0, 3.6, 0, 0, 0, 3.6, 0, 0, 0)
 
 [node name="RadVorneRechts" type="RayCast3D" parent="." node_paths=PackedStringArray("wheel_node")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.52, -1.1)
@@ -191,12 +169,8 @@ wheel_node = NodePath("Nabe")
 
 [node name="Nabe" type="Node3D" parent="RadVorneRechts"]
 
-[node name="Reifen" type="MeshInstance3D" parent="RadVorneRechts/Nabe"]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("Mesh_reifen")
-
-[node name="Speiche" type="MeshInstance3D" parent="RadVorneRechts/Nabe"]
-mesh = SubResource("Mesh_speiche")
+[node name="Reifen" parent="RadVorneRechts/Nabe" instance=ExtResource("6_rad_modell")]
+transform = Transform3D(3.6, 0, 0, 0, 3.6, 0, 0, 0, 3.6, 0, 0, 0)
 
 [node name="RadHintenLinks" type="RayCast3D" parent="." node_paths=PackedStringArray("wheel_node")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.52, 1.1)
@@ -205,12 +179,8 @@ wheel_node = NodePath("Nabe")
 
 [node name="Nabe" type="Node3D" parent="RadHintenLinks"]
 
-[node name="Reifen" type="MeshInstance3D" parent="RadHintenLinks/Nabe"]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("Mesh_reifen")
-
-[node name="Speiche" type="MeshInstance3D" parent="RadHintenLinks/Nabe"]
-mesh = SubResource("Mesh_speiche")
+[node name="Reifen" parent="RadHintenLinks/Nabe" instance=ExtResource("6_rad_modell")]
+transform = Transform3D(3.6, 0, 0, 0, 3.6, 0, 0, 0, 3.6, 0, 0, 0)
 
 [node name="RadHintenRechts" type="RayCast3D" parent="." node_paths=PackedStringArray("wheel_node")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.52, 1.1)
@@ -219,12 +189,8 @@ wheel_node = NodePath("Nabe")
 
 [node name="Nabe" type="Node3D" parent="RadHintenRechts"]
 
-[node name="Reifen" type="MeshInstance3D" parent="RadHintenRechts/Nabe"]
-transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("Mesh_reifen")
-
-[node name="Speiche" type="MeshInstance3D" parent="RadHintenRechts/Nabe"]
-mesh = SubResource("Mesh_speiche")
+[node name="Reifen" parent="RadHintenRechts/Nabe" instance=ExtResource("6_rad_modell")]
+transform = Transform3D(3.6, 0, 0, 0, 3.6, 0, 0, 0, 3.6, 0, 0, 0)
 
 ; --- Kamera und Ton ------------------------------------------------------
 
@@ -234,3 +200,5 @@ ziel = NodePath("..")
 [node name="Motorton" parent="." node_paths=PackedStringArray("vehicle") instance=ExtResource("4_motorton")]
 max_db = -20.0
 vehicle = NodePath("..")
+
+[editable path="Karosserie"]

@@ -153,7 +153,7 @@ Bei 5 h/Woche, netto vier:
 
 | # | Block | h | Ergebnis | Stand |
 |---|---|---|---|---|
-| 0 | **Karosserie entscheiden** und Kenney Toy Car Kit einbauen (glTF/GLB), `ASSETS.md`-Zeile | 3 | Platzhalter raus | **blockiert** — Entscheidung offen |
+| 0 | **Karosserie entscheiden** und Kenney Toy Car Kit einbauen (glTF/GLB), `ASSETS.md`-Zeile | 3 | Platzhalter raus | **fertig** — Kenney `vehicle-truck` |
 | 1 | Barriere: Geometrie, Höhe, Sichtlinie darüber, statisch | 3 | Auto prallt ab, jedes Mal | **fertig** — `welt/barriere.tscn` |
 | 2 | Rammbock am Auto: Mesh, Kollisionsform, Position | 3 | sichtbar montiert | offen |
 | 3 | Fundstück + Aufnahme (Area3D, Sichtbarkeit umschalten) | 2 | Schleife geschlossen | offen |
@@ -169,10 +169,19 @@ eingefrorenen `RigidBody3D` à 8 Einheiten Breite. Vier Befunde, die im Plan
 nicht standen und die jetzt Abhängigkeiten sind:
 
 - **Die Höhe hängt an der Kamera.** Gemessen: Auto ruht bei `y = 0.07`,
-  Dachkante ~1,84, Kamera-Auge 2,37 im Stand und 2,98 bei Tempo. 2,4 liegt
-  über dem Dach und über dem Stand-Auge, aber unter dem Tempo-Auge. Wer
-  `abstand_tempo`, die Federarm-Neigung oder die Autohöhe ändert, ändert die
-  Wand mit — die Kamera ist hier ein Bauteil, keine Optik.
+  Kamera-Auge 2,37 im Stand und 2,98 bei Tempo. 2,4 liegt über dem Stand-Auge,
+  aber unter dem Tempo-Auge. Wer `abstand_tempo`, die Federarm-Neigung oder
+  die Autohöhe ändert, ändert die Wand mit — die Kamera ist hier ein Bauteil,
+  keine Optik.
+- **Block 0 hat die Wand nachträglich verschoben.** Beim Bau der Wand fuhr
+  noch der Platzhalter mit 1,84 Dachhöhe, und die Wand stand sichtbar darüber.
+  Der Truck ist **2,435** hoch — die Wand liegt jetzt 0,035 *unter* seiner
+  Dachkante, praktisch auf einer Linie. Physikalisch ändert das nichts (drei
+  Anläufe nach dem Tausch: Zahlen identisch), und die Sichtlinie auch nicht,
+  weil die Kamera am Wurzelknoten hängt und nicht an der Karosserie.
+  → **Offene Frage an Block 5:** Ist eine Wand auf exakt Dachhöhe als Schloss
+  lesbar, oder gehört sie 0,3–0,5 höher? Das entscheidet das Auge, nicht die
+  Rechnung.
 - **Die Sichtlinie ist schmaler als der Plan annahm.** Bei Tempo liegt das
   Auge nur 0,58 über der Oberkante. Der verdeckte Bodenstreifen dahinter ist
   rund 4,1 mal der Abstand Kamera–Wand; aus typischer Anfahrt sind das etwa
@@ -228,7 +237,7 @@ Gate.** Eines beantwortet die Frage. Zwei beantworten dieselbe Frage doppelt.
 
 | Frage | Stand |
 |---|---|
-| **Welches Kenney-Auto wird die Spielfigur?** | Offen. Blockiert Block 0. Flaches Dach trägt Rotor, Rammbock und Greifer sichtbar; eine Sportwagensilhouette nicht. |
+| **Welches Kenney-Auto wird die Spielfigur?** | **Entschieden am 27.08.2026: `vehicle-truck`.** Flacher Kastenaufbau, trägt Rammbock, Rotor und Greifer sichtbar. |
 | **Ist der Rammbock das richtige erste Teil?** | Vorschlag oben, mit Begründung. Wenn du die Magnetreifen willst: sag es, dann rechne ich den Plan darauf um — er wird etwa doppelt so lang. |
 | **Ob Slice 1 bestanden ist** | Nur du. "Verdient" ist keine messbare Größe. |
 | **Ob nach Slice 1 Schluss ist** | Auch ein Ja auf die Abnahmefrage ist kein Zwang weiterzumachen. |

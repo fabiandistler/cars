@@ -46,6 +46,7 @@ Gamepad ist ebenfalls belegt (Trigger, linker Stick, A/X/Y).
 
 ```
 auto/spielzeugauto.tscn     Das Auto. HIER sitzen alle Fahrparameter.
+fremd/kenney_toy_car_kit/   Karosserie- und Radmodell (Kenney, CC0)
 kamera/kamerarig.tscn       Verfolgerkamera (Pivot → SpringArm3D → Camera3D)
 kamera/kamera_rig.gd        das einzige selbst geschriebene Skript im Projekt
 welt/kiste.tscn             Boden 400×400, vier Wände, Sonne, Umgebung
@@ -89,9 +90,9 @@ und bewertet.
 
 | Frage | Stand |
 |---|---|
-| **Welches Kenney-Auto wird die Spielfigur?** | Offen — und ab Slice 1 blockierend (siehe [SLICE1.md](SLICE1.md), Block 0). Keine Kleinigkeit: die Karosserieform bestimmt, wo Rotor, Rammbock und Greifer später sichtbar sitzen können. Flaches Dach trägt Anbauten besser als eine Sportwagensilhouette. Bis dahin fährt eine Platzhalter-Karosserie aus Godot-Primitiven, 4 Einheiten lang. |
+| **Welches Kenney-Auto wird die Spielfigur?** | **Entschieden (2026-08-27): der Truck** (`vehicle-truck`). Der flache Kastenaufbau trägt Rammbock, Rotor und Greifer sichtbar; die Rennwagen im Kit tun das nicht. Der Platzhalter aus Godot-Primitiven ist raus. |
 | **Schwerkraftfaktor** | Startwert 2 (`19.62`, Projekteinstellungen → *Physics → 3D → Default Gravity*). Kein belegter Wert, eine Vermutung. Beim Ändern die Kopplungen in `TUNING.md` beachten. |
-| **Kenney Toy Car Kit herunterladen** | Noch nicht passiert. glTF/GLB nehmen, nicht FBX. Danach Zeile in `ASSETS.md`. |
+| **Reifenradius gegen Modellgröße** | Offen, aber unkritisch. Der Truck will Radius 0,58, getunt ist 0,45 — er sieht dadurch leicht untergerädert aus. Ändern heißt über die Kopplung in `TUNING.md` auch `max_torque` ändern, also Fahrverhalten statt Optik. |
 
 ## Weiterlesen
 
