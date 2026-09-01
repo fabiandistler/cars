@@ -13,6 +13,10 @@ gesamte Projekt:
 
 Wenn nein, endet das Projekt nach 35 investierten Stunden statt nach 500.
 
+**Stand: bestanden (2026-08-27).** Damit ist Slice 0 beendet — nach der Regel
+in [TUNING.md](TUNING.md) wird danach entschieden, nicht weitergedreht. Der
+nächste Bauabschnitt steht in [SLICE1.md](SLICE1.md).
+
 ## Loslegen
 
 1. **Godot 4.6** herunterladen, Standard-Build (**nicht** .NET — kein C# nötig).
@@ -84,7 +88,7 @@ und bewertet.
 
 | Frage | Stand |
 |---|---|
-| **Welches Kenney-Auto wird die Spielfigur?** | Offen, und keine Kleinigkeit: die Karosserieform bestimmt, wo Rotor, Rammbock und Greifer später sichtbar sitzen können. Flaches Dach trägt Anbauten besser als eine Sportwagensilhouette. Bis dahin fährt eine Platzhalter-Karosserie aus Godot-Primitiven, 4 Einheiten lang. |
+| **Welches Kenney-Auto wird die Spielfigur?** | Offen — und ab Slice 1 blockierend (siehe [SLICE1.md](SLICE1.md), Block 0). Keine Kleinigkeit: die Karosserieform bestimmt, wo Rotor, Rammbock und Greifer später sichtbar sitzen können. Flaches Dach trägt Anbauten besser als eine Sportwagensilhouette. Bis dahin fährt eine Platzhalter-Karosserie aus Godot-Primitiven, 4 Einheiten lang. |
 | **Schwerkraftfaktor** | Startwert 2 (`19.62`, Projekteinstellungen → *Physics → 3D → Default Gravity*). Kein belegter Wert, eine Vermutung. Beim Ändern die Kopplungen in `TUNING.md` beachten. |
 | **Kenney Toy Car Kit herunterladen** | Noch nicht passiert. glTF/GLB nehmen, nicht FBX. Danach Zeile in `ASSETS.md`. |
 
@@ -96,3 +100,4 @@ und bewertet.
 | [TUNING.md](TUNING.md) | Das Tuning-Protokoll |
 | [ASSETS.md](ASSETS.md) | Herkunft und Lizenz jedes fremden Bestandteils |
 | [CLAUDE.md](CLAUDE.md) | Was in diesem Slice nicht passiert |
+| [SLICE1.md](SLICE1.md) | Der nächste Bauabschnitt: das erste Gate |
